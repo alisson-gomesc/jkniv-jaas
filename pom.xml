@@ -5,7 +5,7 @@
   <artifactId>jkniv-jaas</artifactId>
   <name>jkniv-jaas</name>
   <version>0.2.0</version>
-  <packaging>jar</packaging>
+  <packaging>pom</packaging>
   <url>http://jkniv.sf.net</url>
   <description>JAAS Hybrid realm module (LDAP and JDBC) for Glassfish</description>
  
