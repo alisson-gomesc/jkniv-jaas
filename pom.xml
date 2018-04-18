@@ -17,6 +17,7 @@
   </properties>
   <modules>
     <module>jkniv-jaas-glassfish</module>
+    <module>jkniv-jaas-jetty</module>
   </modules>  
   <distributionManagement>
     <site>
