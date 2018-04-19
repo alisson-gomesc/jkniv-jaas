@@ -1,5 +1,5 @@
 /* 
- * JKNIV ,
+ * JKNIV JAAS,
  * Copyright (C) 2017, the original author or authors.
  *
  * This library is free software; you can redistribute it and/or
@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package net.sf.jkniv.jaas.gf;
+package net.sf.jkniv.jaas.jetty;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
@@ -26,32 +26,27 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
-import java.util.Vector;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.eclipse.jetty.util.log.Logger;
 
 import javax.security.auth.login.LoginException;
 import javax.sql.DataSource;
 
-import com.sun.enterprise.security.auth.digest.api.Password;
-import com.sun.enterprise.security.auth.realm.BadRealmException;
-import com.sun.enterprise.security.auth.realm.InvalidOperationException;
-import com.sun.enterprise.security.auth.realm.NoSuchRealmException;
-import com.sun.enterprise.security.auth.realm.NoSuchUserException;
-import com.sun.enterprise.util.i18n.StringManager;
-import com.sun.logging.LogDomains;
+//import com.sun.enterprise.security.auth.digest.api.Password;
+//import com.sun.enterprise.security.auth.realm.BadRealmException;
+//import com.sun.enterprise.security.auth.realm.InvalidOperationException;
+//import com.sun.enterprise.security.auth.realm.NoSuchRealmException;
+//import com.sun.enterprise.security.auth.realm.NoSuchUserException;
+//import com.sun.enterprise.util.i18n.StringManager;
+//import com.sun.logging.LogDomains;
+
 
 class JdbcAdapter
 {
-    private static final Logger          LOG                              = MyLoggerFactory
-            .getLogger(JdbcAdapter.class);
+    private static final Logger          LOG                              = MyLoggerFactory.getLogger(JdbcAdapter.class);
     
-    protected static final StringManager i18n                             = StringManager.getManager(JdbcAdapter.class);
     
     public static final String           PROP_DATASOURCE_JNDI             = "datasource-jndi";
     
@@ -74,7 +69,7 @@ class JdbcAdapter
     public static final String           PROP_SQL_FOR_FAILED              = "sql-failed";
     public static final String           PROP_PLACEHOLDER_FOR_EQUAL       = "placeholder-for-equal";
     /** Place holder for = sql, default is # */
-    private final String          placeHolderForEqual ;
+    private String          placeHolderForEqual ;
     
     //private Map<String, Vector<String>>    groupCache;
     //private Vector<String>               emptyVector;
@@ -96,7 +91,7 @@ class JdbcAdapter
      * @exception NoSuchRealmException If the configuration parameters
      *     specify a realm which doesn't exist.
      */
-    public JdbcAdapter(Properties props)// throws BadRealmException, NoSuchRealmException
+    public JdbcAdapter(Properties props) throws BadRealmException//, NoSuchRealmException
     {
         //this.groupCache = new HashMap<String, Vector<String>>();
         String columunUserName = props.getProperty(PROP_TABLE_USER_COLUMN_NAME);
@@ -105,7 +100,9 @@ class JdbcAdapter
         String tableUser = props.getProperty(PROP_TABLE_USER);
         String tableGroup = props.getProperty(PROP_TABLE_GROUP);
         String columnGroupName = props.getProperty(PROP_TABLE_GROUP_COLUMN_NAME);
-        String columnGroupUserName = props.getProperty(PROP_TABLE_GROUP_COLUMN_USERNAME, columunUserName);
+        String columnGroupUserName = props.getProperty(PROP_TABLE_GROUP_COLUMN_USERNAME);
+        if (columnGroupUserName == null)
+            columnGroupUserName = columunUserName;
         dsJndi = props.getProperty(PROP_DATASOURCE_JNDI);
         String cipherAlgoritm = props.getProperty(PROP_CIPHER_PASSWD);
         String charset = props.getProperty(PROP_CHARSET);
@@ -124,7 +121,7 @@ class JdbcAdapter
         // TODO valid mandatory properties
         if (tableGroup == null)
         {
-            String msg = i18n.getString("hybrid.jdbc.missingprop", PROP_TABLE_GROUP, "JDBCRealm");
+            String msg = I18nManager.getString("hybrid.jdbc.missingprop", PROP_TABLE_GROUP, "JDBCRealm");
             //throw new BadRealmException(msg);
         }
         
@@ -184,7 +181,7 @@ class JdbcAdapter
         try
         {
             connection = getConnection();
-            LOG.log(Level.FINE, sqlGroup);
+            LOG.info(sqlGroup);
             int nroParams = countParams(sqlGroup);
             statement = connection.prepareStatement(sqlGroup);
             for(int i=0;i<nroParams; i++)
@@ -196,10 +193,10 @@ class JdbcAdapter
         }
         catch (Exception ex)
         {
-            String msg = i18n.getString("hybrid.jdbc.grouperror", user);
-            LOG.log(Level.WARNING, msg);
-            if (LOG.isLoggable(Level.FINE))
-                LOG.log(Level.FINE, msg, ex);
+            String msg = I18nManager.getString("hybrid.jdbc.grouperror", user);
+            LOG.warn(msg);
+            if (LOG.isDebugEnabled())
+                LOG.debug(msg, ex);
         }
         finally
         {
@@ -240,7 +237,7 @@ class JdbcAdapter
         try
         {
             connection = getConnection();
-            LOG.log(Level.FINE, sqlPasswd);
+            LOG.debug(sqlPasswd);
             statement = connection.prepareStatement(sqlPasswd);
             int nroParams = countParams(sqlPasswd);
             for(int i=0; i<nroParams; i++)
@@ -258,14 +255,14 @@ class JdbcAdapter
         }
         catch (SQLException ex)
         {
-            String msg = i18n.getString("hybrid.realm.invaliduser", username);
-            LOG.log(Level.SEVERE, msg);
-            if (LOG.isLoggable(Level.FINE))
-                LOG.log(Level.FINE, i18n.getString("hybrid.realm.invaliduserpass", username, "***"), ex);
+            String msg = I18nManager.getString("hybrid.realm.invaliduser", username);
+            LOG.warn(msg);
+            if (LOG.isDebugEnabled())
+                LOG.debug(I18nManager.getString("hybrid.realm.invaliduserpass", username, "***"), ex);
         }
         catch (UnsupportedEncodingException e)
         {
-            LOG.log(Level.SEVERE, i18n.getString("hybrid.jdbc.cypher", username), e);
+            LOG.warn(I18nManager.getString("hybrid.jdbc.cypher", username), e);
         }
         finally
         {
@@ -284,7 +281,7 @@ class JdbcAdapter
         try
         {
             connection = getConnection();
-            LOG.log(Level.FINER, sqlForSucceeded);
+            LOG.debug(sqlForSucceeded);
             int nroParams = countParams(sqlForSucceeded);
             statement = connection.prepareStatement(sqlForSucceeded);
             for(int i=0;i<nroParams; i++)
@@ -294,10 +291,10 @@ class JdbcAdapter
         }
         catch (Exception ex)
         {
-            String msg = i18n.getString("hybrid.jdbc.sqlerror", "sql-succeeded", user);
-            LOG.log(Level.WARNING, msg);
-            if (LOG.isLoggable(Level.FINE))
-                LOG.log(Level.FINE, msg, ex);
+            String msg = I18nManager.getString("hybrid.jdbc.sqlerror", "sql-succeeded", user);
+            LOG.warn(msg);
+            if (LOG.isDebugEnabled())
+                LOG.debug(msg, ex);
         }
         finally
         {
@@ -315,7 +312,7 @@ class JdbcAdapter
         try
         {
             connection = getConnection();
-            LOG.log(Level.FINER, sqlForFailed);
+            LOG.debug(sqlForFailed);
             int nroParams = countParams(sqlForFailed);
             statement = connection.prepareStatement(sqlForFailed);
             for(int i=0;i<nroParams; i++)
@@ -325,10 +322,10 @@ class JdbcAdapter
         }
         catch (Exception ex)
         {
-            String msg = i18n.getString("hybrid.jdbc.sqlerror", "sql-failed", user);
-            LOG.log(Level.WARNING, msg);
-            if (LOG.isLoggable(Level.FINE))
-                LOG.log(Level.FINE, msg, ex);
+            String msg = I18nManager.getString("hybrid.jdbc.sqlerror", "sql-failed", user);
+            LOG.warn(msg);
+            if (LOG.isDebugEnabled())
+                LOG.debug(msg, ex);
         }
         finally
         {
@@ -386,7 +383,7 @@ class JdbcAdapter
         }
         catch (Exception ex)
         {
-            String msg = i18n.getString("hybrid.jdbc.cantconnect", dsJndi);
+            String msg = I18nManager.getString("hybrid.jdbc.cantconnect", dsJndi);
             LoginException loginEx = new LoginException(msg);
             loginEx.initCause(ex);
             throw loginEx;

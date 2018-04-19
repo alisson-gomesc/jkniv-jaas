@@ -24,7 +24,7 @@ import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-public class SHA256 implements Cipher
+final class SHA256 implements Cipher
 {
     private static final String ALGO = Cipher.SHA256;
     private Charset charset;

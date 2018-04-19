@@ -1,5 +1,5 @@
 /* 
- * JKNIV ,
+ * JKNIV JAAS,
  * Copyright (C) 2017, the original author or authors.
  *
  * This library is free software; you can redistribute it and/or
@@ -17,25 +17,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package net.sf.jkniv.jaas.gf;
+package net.sf.jkniv.jaas.jetty;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-public class SHA256 implements Cipher
+final class MD5 implements Cipher
 {
-    private static final String ALGO = Cipher.SHA256;
+    private static final String ALGO = Cipher.MD5;
     private Charset charset;
-    private MessageDigest sha256;
+    private MessageDigest md5;
     
-    public SHA256()
+    public MD5()
     {
         init();
     }
 
-    public SHA256(Charset charset)
+    public MD5(Charset charset)
     {
         init();
         this.charset = charset;
@@ -45,7 +45,7 @@ public class SHA256 implements Cipher
     {
         try
         {
-            sha256 = MessageDigest.getInstance(ALGO);
+            md5 = MessageDigest.getInstance(ALGO);
         }
         catch (NoSuchAlgorithmException e)
         {
@@ -60,8 +60,8 @@ public class SHA256 implements Cipher
     {
         StringBuffer md5Result = new StringBuffer();
         
-        sha256.reset();
-        byte[] hash = sha256.digest(phrase.getBytes(charset));
+        md5.reset();
+        byte[] hash = md5.digest(phrase.getBytes(charset));
         
         for (int i = 0; i < hash.length; i++) {
             if ((0xff & hash[i]) < 0x10) {

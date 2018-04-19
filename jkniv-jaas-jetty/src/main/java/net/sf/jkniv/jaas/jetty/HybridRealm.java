@@ -1,5 +1,5 @@
 /* 
- * JKNIV ,
+ * JKNIV JAAS,
  * Copyright (C) 2017, the original author or authors.
  *
  * This library is free software; you can redistribute it and/or
@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package net.sf.jkniv.jaas.gf;
+package net.sf.jkniv.jaas.jetty;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,22 +28,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.security.auth.login.LoginException;
 
-import com.sun.appserv.security.AppservRealm;
-import com.sun.enterprise.security.auth.realm.BadRealmException;
-import com.sun.enterprise.security.auth.realm.IASRealm;
-import com.sun.enterprise.security.auth.realm.InvalidOperationException;
-import com.sun.enterprise.security.auth.realm.NoSuchRealmException;
-import com.sun.enterprise.security.auth.realm.NoSuchUserException;
-import com.sun.enterprise.security.auth.realm.Realm;
-import com.sun.enterprise.util.i18n.StringManager;
-import com.sun.logging.LogDomains;
+import org.eclipse.jetty.util.log.Logger;
+//
+//import com.sun.appserv.security.AppservRealm;
+//import com.sun.enterprise.security.auth.realm.IASRealm;
+//import com.sun.enterprise.security.auth.realm.InvalidOperationException;
+//import com.sun.enterprise.security.auth.realm.NoSuchRealmException;
+//import com.sun.enterprise.security.auth.realm.NoSuchUserException;
+//import com.sun.enterprise.util.i18n.StringManager;
 
-public class HybridRealm extends AppservRealm
+public class HybridRealm //extends AppservRealm
 {
     private static final Logger        LOG                  = MyLoggerFactory.getLogger(HybridRealm.class);
     
@@ -54,7 +51,6 @@ public class HybridRealm extends AppservRealm
     public static final String         PROP_AUTHO_TYPE_LDAP = "autho-ldap";
     public static final String         PROP_ASSIGN_GROUPS   = "assign-groups";
     public static final String         PROP_AUTH_TYPE       = "hybrid+ldap+jdbc";
-    private static final StringManager i18n                 = StringManager.getManager(JdbcAdapter.class);
     private JdbcAdapter                jdbcAdapter;
     private LdapAdapter                ldapAdapter;
     private boolean                    supportsAuthLdap;
@@ -63,39 +59,39 @@ public class HybridRealm extends AppservRealm
     private boolean                    supportsAuthoJdbc;
     private Map<String, Vector>        cacheGroup;
     private Vector<String>             emptyVector;
+    private Properties props;
     
-    @Override
-    public void init(Properties props) throws BadRealmException, NoSuchRealmException
+    public HybridRealm(Properties props) //throws BadRealmException, NoSuchRealmException
     {
-        Properties propsRealm = getProperties();
         this.cacheGroup = new HashMap<String, Vector>();
         this.emptyVector = new Vector<String>();
-        
+        this.props = props;
         this.jdbcAdapter = new JdbcAdapter(props);
         this.ldapAdapter = new LdapAdapter(props);
-        if (LOG.isLoggable(Level.CONFIG))
+        LOG.info("Init Realm");
+        if (LOG.isDebugEnabled())
         {
-            LOG.config("Init clsiv Realm");
             for (Object k : props.keySet())
-                LOG.config(k + "=" + props.get(k));
+                LOG.debug(k + "=" + props.get(k));
         }
         // Pass the properties declared in the console to the system
-        String ctxParam = props.getProperty(IASRealm.JAAS_CONTEXT_PARAM);
-        setProperty(IASRealm.JAAS_CONTEXT_PARAM, ctxParam);
+        //String ctxParam = props.getProperty(IASRealm.JAAS_CONTEXT_PARAM);
+        //setProperty(IASRealm.JAAS_CONTEXT_PARAM, ctxParam);
         String assignGroups = props.getProperty(PROP_ASSIGN_GROUPS);
-        if (assignGroups != null && !"".equals(assignGroups.trim()))
-            setProperty(PROP_ASSIGN_GROUPS, assignGroups);
+        //if (assignGroups != null && !"".equals(assignGroups.trim()))
+        //    setProperty(PROP_ASSIGN_GROUPS, assignGroups);
         
-        this.supportsAuthLdap = Boolean.valueOf(setPropertyValue(PROP_AUTH_TYPE_LDAP, "true", props));
-        this.supportsAuthJdbc = Boolean.valueOf(setPropertyValue(PROP_AUTH_TYPE_JDBC, "false", props));
-        this.supportsAuthoLdap = Boolean.valueOf(setPropertyValue(PROP_AUTHO_TYPE_LDAP, "false", props));
-        this.supportsAuthoJdbc = Boolean.valueOf(setPropertyValue(PROP_AUTHO_TYPE_JDBC, "true", props));
+        this.supportsAuthLdap = Boolean.valueOf(props.getProperty(PROP_AUTH_TYPE_LDAP, "true"));
+        this.supportsAuthJdbc = Boolean.valueOf(props.getProperty(PROP_AUTH_TYPE_JDBC, "false"));
+        this.supportsAuthoLdap = Boolean.valueOf(props.getProperty(PROP_AUTHO_TYPE_LDAP, "false"));
+        this.supportsAuthoJdbc = Boolean.valueOf(props.getProperty(PROP_AUTHO_TYPE_JDBC, "true"));
     }
     
-    public String[] authenticate(String username, char[] _password) throws LoginException
+    //public String[] authenticate(String username) throws LoginException
+    public String[] authenticate(String username, String password) throws LoginException
     {
         String groups[] = null;
-        String password = String.valueOf(_password);
+        //String password = String.valueOf(_password);
         boolean authLdap = false;
         boolean authJdbc = false;
         
@@ -107,12 +103,12 @@ public class HybridRealm extends AppservRealm
         //        LOG.log(Level.WARNING,"LEVEL WARNING");
         //        LOG.log(Level.SEVERE,"LEVEL SEVERE");
         
-        LOG.finest(i18n.getString("hybrid.realm.infoauth", new Object[]
+        LOG.debug(I18nManager.getString("hybrid.realm.infoauth", new Object[]
         { username + ":*****", Boolean.valueOf(supportsAuthJdbc), Boolean.valueOf(supportsAuthLdap),
                 Boolean.valueOf(supportsAuthoJdbc), Boolean.valueOf(supportsAuthoLdap) }));
         
         if (!supportsAuthJdbc && !supportsAuthLdap)
-            throw new LoginException(sm.getString("hybrid.realm.withoutauth"));
+            throw new LoginException(I18nManager.getString("hybrid.realm.withoutauth"));
         
         if (supportsAuthLdap)
             authLdap = ldapAdapter.authenticate(username, password, supportsAuthoLdap);
@@ -123,7 +119,7 @@ public class HybridRealm extends AppservRealm
         if (!authLdap && !authJdbc)
         {
             jdbcAdapter.logForFailed(username);
-            throw new LoginException(sm.getString("hybrid.realm.loginfail", username));
+            throw new LoginException(I18nManager.getString("hybrid.realm.loginfail", username));
         }
         
         List<String> grpList = getGroupsFromAdapters(username);
@@ -132,7 +128,7 @@ public class HybridRealm extends AppservRealm
         int i = 0;
         for (String g : grpList)
         {
-            LOG.finest("group -> " + g);
+            LOG.debug("group -> " + g);
             groups[i++] = g;
         }
         
@@ -140,8 +136,8 @@ public class HybridRealm extends AppservRealm
         return groups;
     }
     
-    @Override
-    public Enumeration getGroupNames(String username) throws InvalidOperationException, NoSuchUserException
+    //@Override
+    public Enumeration getGroupNames(String username) //throws InvalidOperationException, NoSuchUserException
     {
         Vector<String> vector = this.cacheGroup.get(username);
         if (vector == null)
@@ -171,7 +167,7 @@ public class HybridRealm extends AppservRealm
         allGroups.addAll(groupsLdap);
         allGroups.addAll(groupsJdbc);
         
-        String assignGroups = getProperty(PROP_ASSIGN_GROUPS);
+        String assignGroups = this.props.getProperty(PROP_ASSIGN_GROUPS);
         if (assignGroups != null)
         {
             String[] groups = assignGroups.split(",");
@@ -184,6 +180,7 @@ public class HybridRealm extends AppservRealm
     private Enumeration<String> getGroupsLdap(String username, String password) throws LoginException
     {
         Enumeration<String> groupsLdap = new Hashtable<String, String>().elements();
+        //FIXME get groups from LDAP
         return groupsLdap;
     }
     
@@ -224,37 +221,37 @@ public class HybridRealm extends AppservRealm
     }
     */
     
-    /**
-     * Returns a short (preferably less than fifteen characters) description
-     * of the kind of authentication which is supported by this realm.
-     *
-     * @return Description of the kind of authentication that is directly
-     *     supported by this realm.
-     */
-    @Override
-    public String getAuthType()
-    {
-        return PROP_AUTH_TYPE;
-    }
+//    /**
+//     * Returns a short (preferably less than fifteen characters) description
+//     * of the kind of authentication which is supported by this realm.
+//     *
+//     * @return Description of the kind of authentication that is directly
+//     *     supported by this realm.
+//     */
+//    @Override
+//    public String getAuthType()
+//    {
+//        return PROP_AUTH_TYPE;
+//    }
+//    
+//    @Override
+//    public String getJAASContext()
+//    {
+//        return "hybridRealm";
+//    }
     
-    @Override
-    public String getJAASContext()
-    {
-        return "hybridRealm";
-    }
-    
-    private String setPropertyValue(final String key, final String defaultValue, Properties props)
-    {
-        String value = props.getProperty(key, defaultValue);
-        setProperty(key, value);
-        return value;
-    }
-    
-    private String getProperty(String name, String defaultValue)
-    {
-        String value = super.getProperty(name);
-        return (value == null ? defaultValue : value);
-    }
+//    private String setPropertyValue(final String key, final String defaultValue, Properties props)
+//    {
+//        String value = props.getProperty(key, defaultValue);
+//        setProperty(key, value);
+//        return value;
+//    }
+//    
+//    private String getProperty(String name, String defaultValue)
+//    {
+//        String value = super.getProperty(name);
+//        return (value == null ? defaultValue : value);
+//    }
     
     private void cachingGroupNames(String username, List<String> groups)
     {

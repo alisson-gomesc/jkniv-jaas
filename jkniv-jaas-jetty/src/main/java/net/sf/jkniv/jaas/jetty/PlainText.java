@@ -1,5 +1,5 @@
 /* 
- * JKNIV ,
+ * JKNIV JAAS,
  * Copyright (C) 2017, the original author or authors.
  *
  * This library is free software; you can redistribute it and/or
@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package net.sf.jkniv.jaas.gf;
+package net.sf.jkniv.jaas.jetty;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;

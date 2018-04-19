@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package net.sf.jkniv.jaas.gf;
+package net.sf.jkniv.jaas.jetty;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -32,10 +32,12 @@ import javax.security.auth.login.LoginException;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.sun.enterprise.security.auth.realm.BadRealmException;
-import com.sun.enterprise.security.auth.realm.InvalidOperationException;
-import com.sun.enterprise.security.auth.realm.NoSuchRealmException;
-import com.sun.enterprise.security.auth.realm.NoSuchUserException;
+//import com.sun.enterprise.security.auth.realm.BadRealmException;
+//import com.sun.enterprise.security.auth.realm.InvalidOperationException;
+//import com.sun.enterprise.security.auth.realm.NoSuchRealmException;
+//import com.sun.enterprise.security.auth.realm.NoSuchUserException;
+
+import net.sf.jkniv.jaas.jetty.LdapAdapter;
 
 public class LdapRealmTest
 {
@@ -45,7 +47,7 @@ public class LdapRealmTest
     private static final String TO_AUTH = USER+"@"+DOMAIN;
     
     @Test
-    public void whenAuthenticationIsSuccessfully() throws LoginException, BadRealmException, NoSuchRealmException 
+    public void whenAuthenticationIsSuccessfully() throws LoginException//, BadRealmException, NoSuchRealmException 
     {
         LdapAdapter ldap = new LdapAdapter(getProps());
         boolean auth = ldap.authenticate(TO_AUTH, PASS, false);
@@ -56,7 +58,7 @@ public class LdapRealmTest
 
 
     @Test @Ignore
-    public void whenFindAndBindGroupsIsSuccessfully() throws BadRealmException, NoSuchRealmException, InvalidOperationException, NoSuchUserException, LoginException, NamingException  
+    public void whenFindAndBindGroupsIsSuccessfully() throws LoginException, BadRealmException//, NoSuchRealmException, InvalidOperationException, NoSuchUserException, NamingException  
     {
         Properties props = getProps();
         props.put(Context.SECURITY_PRINCIPAL, TO_AUTH);

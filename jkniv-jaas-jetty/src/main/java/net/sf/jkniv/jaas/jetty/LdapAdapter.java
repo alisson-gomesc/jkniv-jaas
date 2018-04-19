@@ -1,5 +1,5 @@
 /* 
- * JKNIV ,
+ * JKNIV JAAS,
  * Copyright (C) 2017, the original author or authors.
  *
  * This library is free software; you can redistribute it and/or
@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package net.sf.jkniv.jaas.gf;
+package net.sf.jkniv.jaas.jetty;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -29,10 +29,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.eclipse.jetty.util.log.Logger;
 
 import javax.naming.CompositeName;
 import javax.naming.Context;
@@ -46,11 +46,11 @@ import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.security.auth.login.LoginException;
 
-import com.sun.enterprise.deployment.UserDataConstraintImpl;
-import com.sun.enterprise.security.auth.realm.BadRealmException;
-import com.sun.enterprise.security.auth.realm.NoSuchRealmException;
-import com.sun.enterprise.util.i18n.StringManager;
-import com.sun.logging.LogDomains;
+//import com.sun.enterprise.deployment.UserDataConstraintImpl;
+//import com.sun.enterprise.security.auth.realm.BadRealmException;
+//import com.sun.enterprise.security.auth.realm.NoSuchRealmException;
+//import com.sun.enterprise.util.i18n.StringManager;
+//import com.sun.logging.LogDomains;
 
 class LdapAdapter
 {
@@ -106,9 +106,7 @@ class LdapAdapter
     // Defaults
     private static final String         DEFAULT_SEARCH_FILTER        = "mail=" + SUBST_SUBJECT_NAME;
     private static final String         DEFAULT_JNDICF               = "com.sun.jndi.ldap.LdapCtxFactory";
-    
-    private static final StringManager  i18n                         = StringManager.getManager(JdbcAdapter.class);
-    
+        
     private Properties                  propsLdap                    = new Properties();
     private String                      defaultBaseDn;
     /** pairs from url and baseDn: acme.com.br ->  dc=acme,dc=com,dc=br */
@@ -118,7 +116,7 @@ class LdapAdapter
     private boolean forceAuthLdap;
     private Map<String, Vector<String>> cacheGroup;
     
-    public LdapAdapter(Properties props) throws BadRealmException, NoSuchRealmException
+    public LdapAdapter(Properties props) throws BadRealmException//, NoSuchRealmException
     {
         this.sslEnable = false; // FIXME configure ssl
         this.urlDc = new HashMap<String, String>();
@@ -155,7 +153,7 @@ class LdapAdapter
         boolean auth = false;
         if (forceAuthLdap)
         {
-            LOG.info(i18n.getString("hybrid.ldap.forcelogin", userWithDomain));
+            LOG.info(I18nManager.getString("hybrid.ldap.forcelogin", userWithDomain));
             return true;
         }
         try
@@ -169,10 +167,10 @@ class LdapAdapter
         }
         catch (NamingException ex)
         {
-            String msg = i18n.getString("hybrid.realm.invaliduser", username);
-            LOG.log(Level.WARNING, msg);
-            if (LOG.isLoggable(Level.FINE))
-                LOG.log(Level.FINE, i18n.getString("hybrid.realm.invaliduserpass", username, "***"), ex);
+            String msg = I18nManager.getString("hybrid.realm.invaliduser", username);
+            LOG.warn(msg);
+            if (LOG.isDebugEnabled())
+                LOG.debug(I18nManager.getString("hybrid.realm.invaliduserpass", username, "***"), ex);
             
             //throw new LoginException(msg + " [" + ex.getMessage() + "]");
         }
@@ -200,7 +198,7 @@ class LdapAdapter
         }
         catch (NamingException ex)
         {
-            LOG.log(Level.WARNING, "cannot close ");
+            LOG.warn("cannot close ldap context");
         }
         return auth;
     }
@@ -241,7 +239,7 @@ class LdapAdapter
         }
         catch (NamingException e)
         {
-            LOG.log(Level.WARNING, i18n.getString("hybrid.ldap.groupsearcherror", userWithDomain), e);
+            LOG.warn(I18nManager.getString("hybrid.ldap.groupsearcherror", userWithDomain), e);
         }
         finally
         {
@@ -268,7 +266,7 @@ class LdapAdapter
         if (i > 0)
             domain = userdomain.substring(i + 1);
         
-        LOG.finest("domain=" + domain);
+        LOG.info("domain=" + domain);
         return domain;
     }
     
@@ -289,7 +287,7 @@ class LdapAdapter
         if (directories.length == 0 && defaultDomain != null)
             urlDc.put(defaultDomain, this.domainComponent(defaultDomain));
         
-        LOG.finest("build domain=" + urlDc);
+        LOG.debug("build domain=" + urlDc);
     }
     
     private void checkMandatoryProperties() throws BadRealmException
@@ -299,7 +297,7 @@ class LdapAdapter
         
         if (url == null || urlDc.isEmpty() || propGroupAttr == null)
             throw new BadRealmException(
-                    i18n.getString("hybrid.ldap.badconfig", url, (urlDc.isEmpty() ? "null" : urlDc), propGroupAttr));
+                    I18nManager.getString("hybrid.ldap.badconfig", url, (urlDc.isEmpty() ? "null" : urlDc), propGroupAttr));
     }
     
     private String getProviderUrl(String username)
@@ -319,7 +317,7 @@ class LdapAdapter
             else
                 url = URL_LDAP + url + port;
         }
-        LOG.finest("provider url=" + url);
+        LOG.debug("provider url=" + url);
         return url;
     }
     
@@ -332,7 +330,7 @@ class LdapAdapter
             Attribute attr = (Attribute) ae.next();
             if (attrIDs.contains(attr.getID()))
             {
-                LOG.finest("attribute: " + attr.getID());
+                LOG.debug("attribute: " + attr.getID());
                 NamingEnumeration e = attr.getAll();
                 while (e.hasMore())
                 {
@@ -344,7 +342,7 @@ class LdapAdapter
                         group = matcherCN.group().substring(3);
                         groups.add(group);
                     }
-                    LOG.finest("attr: " + attrValue + ", extract common name as group: " + group);
+                    LOG.debug("attr: " + attrValue + ", extract common name as group: " + group);
                 }
             }
         }
@@ -360,7 +358,7 @@ class LdapAdapter
         if (at < 0 && defaultDomain != null && !"".equals(defaultDomain.trim()))
             userdomain = username + "@" + defaultDomain;
         
-        LOG.finest("user domain=" + userdomain);
+        LOG.debug("user domain=" + userdomain);
         return userdomain;
     }
     

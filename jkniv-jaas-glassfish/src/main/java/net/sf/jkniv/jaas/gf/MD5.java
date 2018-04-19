@@ -24,7 +24,7 @@ import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-public class MD5 implements Cipher
+final class MD5 implements Cipher
 {
     private static final String ALGO = Cipher.MD5;
     private Charset charset;

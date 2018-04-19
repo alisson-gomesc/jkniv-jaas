@@ -16,11 +16,18 @@
   <url>http://jkniv.sf.net</url>
   <description>JAAS Hybrid realm module (LDAP and JDBC) for Jetty</description>
 
+  <properties>
+    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>  
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-jaas</artifactId>
-      <version>9.4.10.RC0</version>
+      <version>9.2.0.RC0</version>
       <scope>provided</scope>
     </dependency>
     <dependency>

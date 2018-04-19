@@ -1,15 +1,15 @@
-Title: JAAS Hybrid Glassfish
+Title: JAAS Hybrid Jetty
 
-JAAS Hybrid Glassfish
+Hybrid JAAS for Jetty
 --------------------
 
-The `jkniv-jaas-glassfish` implements a hybrid realm for authentication and authorization model from [JavaTM Authentication and Authorization Service] (http://docs.oracle.com/javase/1.5.0/docs/guide/security/jaas/JAASRefGuide.html) to Glassfish server.
+The `jkniv-jaas-jetty` implements a hybrid realm for authentication and authorization model from [JavaTM Authentication and Authorization Service] (http://docs.oracle.com/javase/1.5.0/docs/guide/security/jaas/JAASRefGuide.html) to Jetty server.
 
 Maven users will need to add the following dependency to their pom.xml for this component:
 
     <dependency>
       <groupId>net.sf.jkniv</groupId>
-      <artifactId>jkniv-jaas-glassfish</artifactId>
+      <artifactId>jkniv-jaas-jetty</artifactId>
       <version>0.2.0</version>
     </dependency>
 
@@ -18,24 +18,26 @@ The hybrid realm are: LDAP and Database. You can use LDAP to authentication and 
 
 | Realm   | Authentication | Authorization |
 |---------|----------------|---------------|
-|Database |    supports    |   supports    |
 |LDAP     |    supports    |   supports    |
+|RDBMS    |    supports    |   supports    |
+|CouchDB  |    supports    |   supports    |
 
-
-**Note:** It's mandatory to have at least one configured authentication, ldap or jdbc.
+**Note:** It's mandatory to have at least one configured authentication, ldap, jdbc, couchdb.
  
 
 #### Hybrid Realm Properties
 
 | Property             | Default        | Description|
-|----------------------|----------------|---------------|
-| jaas-context         |                | `hybridRealm` |
-| authe-ldap           | `true`        | Enable authentication mode to LDAP |
-| authe-jdbc           | `false`       | Enable authentication mode to JDBC |
-| autho-ldap           | `false`       | Enable authorization mode to LDAP |
-| autho-jdbc           | `true`        | Enable authorization mode to JDBC |
+|----------------------|----------------|--------------------------------------|
+| jaas-context         |                | `hybridRealm`                       |
+| authe-ldap           | `true`        | Enable authentication mode to LDAP    |
+| authe-jdbc           | `false`       | Enable authentication mode to JDBC    |
+| authe-couchdb        | `false`       | Enable authentication mode to COUCHDB |
+| autho-ldap           | `false`       | Enable authorization mode to LDAP     |
+| autho-jdbc           | `true`        | Enable authorization mode to JDBC     |
+| autho-couchdb        | `false`       | Enable authorization mode to COUCHDB |
 | auth-level           | `simple`      | security level to use "none", "simple", "strong" |
-| assign-groups        |                | Comma-separated list of group names. These groups are assigned when the authentication is successfully. |
+| assign-groups        |                | Comma-separated list of group names. These groups are assigned when the **authentication** is successfully. |
 
 
 #### LDAP Properties
@@ -70,8 +72,6 @@ The hybrid realm are: LDAP and Database. You can use LDAP to authentication and 
 | sql-succeeded        |                | An update or insert sql for execute when authenticate login succeeded. |
 | sql-failed           |                | An update or insert sql for execute when authenticate login failure. |
 
-**Note:** The version `jkniv-jaas-glassfish-0.1.0` use `@` as placeholder for `=` sql, this is no more necessary.
-
 Sample JDBC tables to authenticate and authorizate users:
 
     CREATE TABLE "AUTH_USER" 
@@ -92,23 +92,42 @@ Sample JDBC tables to authenticate and authorizate users:
     
 #### Configure Custom Realm for Glassfish  
 
-- Copy the jar file `jkniv-jaas-glassfish.jar` to domain lib `glass-install\glassfish4\glassfish\domains\domain1\lib` from glassfish.
+- Copy the jar file `jkniv-jaas-jetty.jar` to domain lib `jetty-install/lib` from Jetty.
 
-- Edit the file `glass-install\glassfish4\glassfish\domains\domain1\config\login.conf` to config the `hybridRealm`. The name `hybridRealm` must be the same value for `jaas-context` at Hybrid Realm Properties.
+- Create new file `jetty-install/etc/login.conf` to config the `hybridRealm`. The name `hybridRealm` must be the same value for `LoginModuleName` at Hybrid Realm Properties.
 
 
     hybridRealm {
-      net.sf.jkniv.jaas.gf.HybridLoginModule required;
+      net.sf.jkniv.jaas.jetty.HybridLoginModule required;
     };
     
-- Restart glassfish.
+
+- Modify the file `jetty-install/etc/jetty-webapp.xml` append a new element `<Call name="addBean">`:
+
+
+    <Configure id="Server" class="org.eclipse.jetty.server.Server">
+    ...
+      <Call name="addBean">
+        <Arg>
+          <New class="net.sf.jkniv.jaas.jetty.HybridLoginModule">
+            <Set name="name">Hybrid JAAS Realm</Set>
+            <Set name="LoginModuleName">hybridRealm</Set>
+          </New>
+        </Arg>
+      </Call>
+    
+    </Configure>
 
 - Enter into glassfish console to config the custom realm and add new realm.
+
+    
+- start Jetty.
+
 
 ![Glassfish realm properties](realm-config.png)
 
 
-- Add the properties conform your database and ldap properties. The realm name must be the same used at `<login-config>` from web.xml, and class name must be `net.sf.jkniv.jaas.gf.HybridRealm`.
+- Add the properties conform your database and ldap properties. The realm name must be the same used at `<login-config>` from web.xml, and class name must be `net.sf.jkniv.jaas.jetty.HybridRealm`.
 
 ![Glassfish realm properties](props-config.png)
 
@@ -143,4 +162,5 @@ Sample JDBC tables to authenticate and authorizate users:
 
     
     
+[Jetty-Jaas] http://www.eclipse.org/jetty/documentation/current/jaas-support.html "Configuring Jetty JAAS"
     

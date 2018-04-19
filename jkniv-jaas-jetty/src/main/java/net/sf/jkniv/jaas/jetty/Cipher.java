@@ -1,5 +1,5 @@
 /* 
- * JKNIV ,
+ * JKNIV JAAS,
  * Copyright (C) 2017, the original author or authors.
  *
  * This library is free software; you can redistribute it and/or
@@ -16,8 +16,7 @@
  * License along with this library; if not, write to the Free Software Foundation, Inc., 
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
-package net.sf.jkniv.jaas.gf;
+package net.sf.jkniv.jaas.jetty;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
@@ -27,6 +26,7 @@ interface Cipher
     public static final String MD5 = "MD5";
     public static final String SHA256 = "SHA-256";
     public static final String PLAIN_TEXT = "PLAIN_TEXT";
+    public static final String PBK_HMAC_SHA1 = "PBKDF2WithHmacSHA1";
     /**
      * Encrypt the parameter phrase.
      * @param phrase Text to encrypt
@@ -47,7 +47,6 @@ interface Cipher
      * @return {@code true} when the crypto can uncypher the cypher value, {@code false} otherwise.
      */
     boolean supportDecode();
-    
     
     Charset getCharset();
     

@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package net.sf.jkniv.jaas.gf;
+package net.sf.jkniv.jaas.jetty;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -30,11 +30,13 @@ import javax.security.auth.login.LoginException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.sun.enterprise.security.auth.realm.IASRealm;
-import com.sun.enterprise.security.auth.realm.InvalidOperationException;
-import com.sun.enterprise.security.auth.realm.NoSuchUserException;
+//import com.sun.enterprise.security.auth.realm.IASRealm;
+//import com.sun.enterprise.security.auth.realm.InvalidOperationException;
+//import com.sun.enterprise.security.auth.realm.NoSuchUserException;
 
-import net.sf.jkniv.jaas.gf.jndi.JndiCreator;
+import net.sf.jkniv.jaas.jetty.HybridRealm;
+import net.sf.jkniv.jaas.jetty.JdbcAdapter;
+import net.sf.jkniv.jaas.jetty.jndi.JndiCreator;
 
 public class JdbcAdapterTest
 {
@@ -46,7 +48,7 @@ public class JdbcAdapterTest
     }
     
     @Test
-    public void testGroups() throws InvalidOperationException, NoSuchUserException
+    public void testGroups()// throws InvalidOperationException, NoSuchUserException
     {
         JdbcAdapter adapter = new JdbcAdapter(getProps());
         
@@ -73,7 +75,7 @@ public class JdbcAdapterTest
         Properties props = new Properties();
         
         props.put(JdbcAdapter.PROP_DATASOURCE_JNDI, "jdbc/whinstone");
-        props.put(IASRealm.JAAS_CONTEXT_PARAM, "jdbcRealm");
+        //props.put(IASRealm.JAAS_CONTEXT_PARAM, "jdbcRealm");
         props.put(JdbcAdapter.PROP_TABLE_USER_COLUMN_PASSWD, "PASSWD");
         props.put(JdbcAdapter.PROP_TABLE_GROUP, "AUTH_GROUP");
         props.put(JdbcAdapter.PROP_TABLE_USER, "AUTH_USER");

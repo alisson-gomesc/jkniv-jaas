@@ -17,42 +17,76 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package net.sf.jkniv.jaas.gf;
+package net.sf.jkniv.jaas.jetty;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.UnsupportedEncodingException;
 
+import org.junit.Ignore;
 import org.junit.Test;
+
+import net.sf.jkniv.jaas.jetty.Cipher;
+import net.sf.jkniv.jaas.jetty.Hashing.HashingResult;
+import net.sf.jkniv.jaas.jetty.MD5;
+import net.sf.jkniv.jaas.jetty.SHA256;
 
 public class CipherTest
 {
     @Test
     public void whenEncodeSHA256Works() throws UnsupportedEncodingException
     {
-        Cipher sha256= new SHA256();
+        Cipher sha256 = new SHA256();
         assertThat(sha256.encode("admin"), is("8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918"));
     }
     
     @Test
     public void whenEncodeMD5Works() throws UnsupportedEncodingException
     {
-        Cipher md5= new MD5();
+        Cipher md5 = new MD5();
         assertThat(md5.encode("admin"), is("21232f297a57a5a743894a0e4a801fc3"));
     }
     
-    @Test(expected=RuntimeException.class)
+    @Test(expected = RuntimeException.class)
     public void whenDeEncodeSHA256Works() throws UnsupportedEncodingException
     {
-        Cipher sha256= new SHA256();
+        Cipher sha256 = new SHA256();
         sha256.decode("8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918");
     }
     
-    @Test(expected=RuntimeException.class)
+    @Test(expected = RuntimeException.class)
     public void whenDeEncodeMD5Works() throws UnsupportedEncodingException
     {
-        Cipher md5= new MD5();
+        Cipher md5 = new MD5();
         md5.decode("21232f297a57a5a743894a0e4a801fc3");
     }
+    
+    @Test
+    public void whenEncodeHashingWorks() throws UnsupportedEncodingException
+    {
+        HashingResult hash = Hashing.createHash("123456");
+        
+        boolean auth1 = Hashing.validatePassword("0123456", hash.getHash(), hash.getSalt());
+        boolean auth2 = Hashing.validatePassword("123456", hash.getHash(), hash.getSalt());
+        assertThat(auth1, is(false));
+        assertThat(auth2, is(true));
+        System.out.println("hash password: " +hash.getHash());
+    }
+    
+    @Test @Ignore("Verificar se o salt eh guardado no banco de dados postgresql")
+    public void whenEncodeHashingWithPBK() throws UnsupportedEncodingException
+    {
+        HashingResult hash = Hashing.createHash("123456");
+        //boolean auth1 = Hashing.validatePassword("0123456", hash.getHash(), hash.getSalt());
+        //boolean auth2 = Hashing.validatePassword("123456", hash.getHash(), hash.getSalt());
+        Cipher cipher = new PBKDF2WithHmacSHA1();
+        
+        String encoded = cipher.encode("123456");
+        
+        assertThat(hash.getHash(), is(encoded));
+        System.out.println("hash password: " +hash.getHash());
+        System.out.println("hash password: " +encoded);
+    }
+
 }

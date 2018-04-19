@@ -1,6 +1,6 @@
 Title: JAAS Hybrid Glassfish
 
-JAAS Hybrid Glassfish
+Hybrid JAAS for Glassfish
 --------------------
 
 The `jkniv-jaas-glassfish` implements a hybrid realm for authentication and authorization model from [JavaTM Authentication and Authorization Service] (http://docs.oracle.com/javase/1.5.0/docs/guide/security/jaas/JAASRefGuide.html) to Glassfish server.
@@ -18,11 +18,11 @@ The hybrid realm are: LDAP and Database. You can use LDAP to authentication and 
 
 | Realm   | Authentication | Authorization |
 |---------|----------------|---------------|
-|Database |    supports    |   supports    |
+|RDBMS    |    supports    |   supports    |
 |LDAP     |    supports    |   supports    |
 
 
-**Note:** It's mandatory to have at least one configured authentication, ldap or jdbc.
+**Note:** It's mandatory to have at least one configured **authentication**, ldap or jdbc.
  
 
 #### Hybrid Realm Properties
@@ -92,9 +92,9 @@ Sample JDBC tables to authenticate and authorizate users:
     
 #### Configure Custom Realm for Glassfish  
 
-- Copy the jar file `jkniv-jaas-glassfish.jar` to domain lib `glass-install\glassfish4\glassfish\domains\domain1\lib` from glassfish.
+- Copy the jar file `jkniv-jaas-glassfish.jar` to domain lib `glass-install/glassfish4/glassfish/domains/domain1/lib` from glassfish.
 
-- Edit the file `glass-install\glassfish4\glassfish\domains\domain1\config\login.conf` to config the `hybridRealm`. The name `hybridRealm` must be the same value for `jaas-context` at Hybrid Realm Properties.
+- Edit the file `glass-install/glassfish4/glassfish/domains/domain1/config/login.conf` to config the `hybridRealm`. The name `hybridRealm` must be the same value for `jaas-context` at Hybrid Realm Properties.
 
 
     hybridRealm {
@@ -113,7 +113,7 @@ Sample JDBC tables to authenticate and authorizate users:
 ![Glassfish realm properties](props-config.png)
 
 
-- Sample entry at `glass-install\glassfish4\glassfish\domains\domain1\config\domain.xml`: 
+- Sample entry at `glass-install/glassfish4/glassfish/domains/domain1/config/domain.xml`: 
 
     <security-service>
         <auth-realm classname="net.sf.jkniv.jaas.gf.HybridRealm" name="acme-realm">

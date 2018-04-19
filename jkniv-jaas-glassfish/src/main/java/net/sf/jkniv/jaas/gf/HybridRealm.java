@@ -183,6 +183,7 @@ public class HybridRealm extends AppservRealm
     
     private Enumeration<String> getGroupsLdap(String username, String password) throws LoginException
     {
+        // FIXME get groups from LDAP
         Enumeration<String> groupsLdap = new Hashtable<String, String>().elements();
         return groupsLdap;
     }

@@ -1,4 +1,5 @@
 /*
+ * JKNIV JAAS,
  * Copyright 2017 the original author or authors.
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,15 +17,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.sf.jkniv.jaas.gf;
+package net.sf.jkniv.jaas.jetty;
 
-import java.util.logging.Logger;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import com.sun.enterprise.security.auth.realm.Realm;
-import com.sun.logging.LogDomains;
+import org.eclipse.jetty.util.log.Logger;
 
 /**
  * JNDI resource access.
@@ -54,11 +53,11 @@ class JndiResources
         try
         {
             o = ctx.lookup(value);
-            LOG.fine("lookup successfully properties for jndi [" + value + "]");
+            LOG.info("lookup successfully properties for jndi [" + value + "]");
         }
         catch (NamingException e)
         {
-            LOG.severe("Cannot localize the jndi name [" + value + "]: " + e.getMessage());
+            LOG.warn("Cannot localize the jndi name [" + value + "]: " + e.getMessage());
         }
         return o;
     }
