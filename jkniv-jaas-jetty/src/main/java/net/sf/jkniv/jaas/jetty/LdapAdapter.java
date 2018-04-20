@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Vector;
 import java.util.regex.Matcher;
@@ -144,6 +145,9 @@ class LdapAdapter
         
         buildDomainComponent();
         checkMandatoryProperties();
+        LOG.info("LDAP Adapter Properties");
+        for( Entry<Object, Object> entry : propsLdap.entrySet())
+            LOG.info(entry.getKey()+"="+entry.getValue());
     }
     
     public boolean authenticate(final String username, final String password, boolean fetchGroups) throws LoginException

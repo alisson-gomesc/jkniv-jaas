@@ -19,20 +19,10 @@
 
 package net.sf.jkniv.jaas.jetty;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Vector;
-//import java.util.logging.Level;
-//import java.util.logging.Logger;
-
-import org.eclipse.jetty.util.log.Logger;
-import org.eclipse.jetty.util.security.Credential;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
@@ -46,7 +36,8 @@ import javax.security.auth.login.LoginException;
 import org.eclipse.jetty.jaas.callback.ObjectCallback;
 import org.eclipse.jetty.jaas.spi.AbstractLoginModule;
 import org.eclipse.jetty.jaas.spi.UserInfo;
-import org.eclipse.jetty.jaas.spi.AbstractLoginModule.JAASUserInfo;
+import org.eclipse.jetty.util.log.Logger;
+import org.eclipse.jetty.util.security.Credential;
 
 public class HybridLoginModule extends AbstractLoginModule
 {
@@ -86,6 +77,7 @@ public class HybridLoginModule extends AbstractLoginModule
             Map<String, ?> options)
     {
         super.initialize(subject, callbackHandler, sharedState, options);
+        System.out.println("initialize -> " + options);
         Properties propsRealm = new Properties();
         propsRealm.putAll(options);
         this._currentRealm = new HybridRealm(propsRealm);
@@ -123,8 +115,9 @@ public class HybridLoginModule extends AbstractLoginModule
     public boolean login() throws LoginException
     {
         CallbackHandler callbackHandler = getCallbackHandler();
+        LOG.info("login user..");
         try
-        {  
+        { 
             if (isIgnored())
                 return false;
             
@@ -143,29 +136,36 @@ public class HybridLoginModule extends AbstractLoginModule
 
             if ((webUserName == null) || (webCredential == null))
             {
+                LOG.info(I18nManager.getString("hybrid.realm.loginfail", webUserName));
                 setAuthenticated(false);
                 throw new FailedLoginException();
             }
 
             String[] grpList = _currentRealm.authenticate(webUserName, webCredential.toString());
-
+            
             UserInfo userInfo = new UserInfo(webUserName, Credential.getCredential(webCredential.toString()), Arrays.asList(grpList));
             //UserInfo userInfo = getUserInfo(webUserName);
 
             JAASUserInfo currentUser = new JAASUserInfo(userInfo);
             setCurrentUser(currentUser);
             setAuthenticated(true);
+            currentUser.fetchRoles();
+            //currentUser.setJAASInfo(getSubject());
+            LOG.info(I18nManager.getString("hybrid.realm.login.successfully", webUserName));
         }
         catch (IOException e)
         {
+            e.printStackTrace();// TODO remove e.printStackTrace()
             throw new LoginException (e.toString());
         }
         catch (UnsupportedCallbackException e)
         {
+            e.printStackTrace();// TODO remove e.printStackTrace() 
             throw new LoginException (e.toString());
         }
         catch (Exception e)
         {
+            e.printStackTrace();// TODO remove e.printStackTrace()
             if (e instanceof LoginException)
                 throw (LoginException)e;
             throw new LoginException (e.toString());
@@ -206,7 +206,8 @@ public class HybridLoginModule extends AbstractLoginModule
         
         //if (LOG.isLoggable(Level.FINER))
         LOG.info("Hybrid login succeeded for: " + _username + " groups:" + Arrays.toString(grpList));
-
+        UserInfo userInfo = new UserInfo(_username, Credential.getCredential("123456"), Arrays.asList(grpList));
+        userInfo.fetchRoles();
         return new UserInfo(_username, Credential.getCredential("123456"), Arrays.asList(grpList));
     }
 

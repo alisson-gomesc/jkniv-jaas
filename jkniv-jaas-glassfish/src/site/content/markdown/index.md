@@ -34,7 +34,6 @@ The hybrid realm are: LDAP and Database. You can use LDAP to authentication and 
 | authe-jdbc           | `false`       | Enable authentication mode to JDBC |
 | autho-ldap           | `false`       | Enable authorization mode to LDAP |
 | autho-jdbc           | `true`        | Enable authorization mode to JDBC |
-| auth-level           | `simple`      | security level to use "none", "simple", "strong" |
 | assign-groups        |                | Comma-separated list of group names. These groups are assigned when the authentication is successfully. |
 
 

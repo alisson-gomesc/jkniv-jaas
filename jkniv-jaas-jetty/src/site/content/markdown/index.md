@@ -36,7 +36,6 @@ The hybrid realm are: LDAP and Database. You can use LDAP to authentication and 
 | autho-ldap           | `false`       | Enable authorization mode to LDAP     |
 | autho-jdbc           | `true`        | Enable authorization mode to JDBC     |
 | autho-couchdb        | `false`       | Enable authorization mode to COUCHDB |
-| auth-level           | `simple`      | security level to use "none", "simple", "strong" |
 | assign-groups        |                | Comma-separated list of group names. These groups are assigned when the **authentication** is successfully. |
 
 
@@ -90,11 +89,16 @@ Sample JDBC tables to authenticate and authorizate users:
     )
     
     
-#### Configure Custom Realm for Glassfish  
+#### Configure Custom Realm for Jetty  
 
-- Copy the jar file `jkniv-jaas-jetty.jar` to domain lib `jetty-install/lib` from Jetty.
+Copy the jar files to domain lib `jetty-install/lib` from Jetty:
+ - `log4j-1.2.17.jar`, `slf4j-api-1.7.25.jar`, `log4j-over-slf4j-1.7.25.jar`, `slf4j-log4j12-1.7.21.jar`
+ - `jkniv-jaas-jetty.jar` to domain lib 
+ - `http://repo1.maven.org/maven2/com/jolbox/bonecp/0.8.0.RELEASE/bonecp-0.8.0.RELEASE.jar`
+ - `ojdbc6-11.2.0.jar`
 
-- Create new file `jetty-install/etc/login.conf` to config the `hybridRealm`. The name `hybridRealm` must be the same value for `LoginModuleName` at Hybrid Realm Properties.
+
+Create new file `jetty-install/etc/login.conf` to config the `hybridRealm`. The name `hybridRealm` must be the same value for `LoginModuleName` at Hybrid Realm Properties.
 
 
     hybridRealm {
@@ -106,20 +110,24 @@ Sample JDBC tables to authenticate and authorizate users:
 
 
     <Configure id="Server" class="org.eclipse.jetty.server.Server">
-    ...
+      ...
       <Call name="addBean">
         <Arg>
-          <New class="net.sf.jkniv.jaas.jetty.HybridLoginModule">
-            <Set name="name">Hybrid JAAS Realm</Set>
+          <New class="org.eclipse.jetty.jaas.JAASLoginService">
+            <Set name="name">acme-realm</Set>
             <Set name="LoginModuleName">hybridRealm</Set>
           </New>
         </Arg>
-      </Call>
-    
+      </Call>    
     </Configure>
 
 - Enter into glassfish console to config the custom realm and add new realm.
 
+
+Enable security via jaas, and configure it
+
+    --module=jaas
+    jetty.jaas.login.conf=etc/login.conf
     
 - start Jetty.
 

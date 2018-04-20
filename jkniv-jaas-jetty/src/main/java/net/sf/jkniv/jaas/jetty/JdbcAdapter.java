@@ -103,7 +103,7 @@ class JdbcAdapter
         String columnGroupUserName = props.getProperty(PROP_TABLE_GROUP_COLUMN_USERNAME);
         if (columnGroupUserName == null)
             columnGroupUserName = columunUserName;
-        dsJndi = props.getProperty(PROP_DATASOURCE_JNDI);
+        dsJndi = "jdbc/"+props.getProperty(PROP_DATASOURCE_JNDI);
         String cipherAlgoritm = props.getProperty(PROP_CIPHER_PASSWD);
         String charset = props.getProperty(PROP_CHARSET);
         if (charset == null || "".equals(charset.trim()))
@@ -146,6 +146,15 @@ class JdbcAdapter
             sqlForSucceeded = sqlForSucceeded.replaceAll(placeHolderForEqual, "\\=");
         if (isNotEmpty(sqlForFailed))
             sqlForFailed = sqlForFailed.replaceAll(placeHolderForEqual, "\\=");
+
+        LOG.info("JDBC Adapter Properties");
+        LOG.info("jndi="+dsJndi);
+        LOG.info("sqlPasswd="+sqlPasswd);
+        LOG.info("sqlGroup="+sqlGroup);
+        LOG.info("sqlForSucceeded="+sqlForSucceeded);
+        LOG.info("sqlForFailed="+sqlForFailed);
+        LOG.info("cipher="+cipher.getAlgorithm());
+        LOG.info("charset="+charset);
     }
     
     /**

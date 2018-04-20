@@ -63,12 +63,12 @@ public class HybridRealm //extends AppservRealm
     
     public HybridRealm(Properties props) //throws BadRealmException, NoSuchRealmException
     {
+        LOG.info("Starting " + getClass().getSimpleName() + " realm");
         this.cacheGroup = new HashMap<String, Vector>();
         this.emptyVector = new Vector<String>();
         this.props = props;
         this.jdbcAdapter = new JdbcAdapter(props);
         this.ldapAdapter = new LdapAdapter(props);
-        LOG.info("Init Realm");
         if (LOG.isDebugEnabled())
         {
             for (Object k : props.keySet())
@@ -103,9 +103,8 @@ public class HybridRealm //extends AppservRealm
         //        LOG.log(Level.WARNING,"LEVEL WARNING");
         //        LOG.log(Level.SEVERE,"LEVEL SEVERE");
         
-        LOG.debug(I18nManager.getString("hybrid.realm.infoauth", new Object[]
-        { username + ":*****", Boolean.valueOf(supportsAuthJdbc), Boolean.valueOf(supportsAuthLdap),
-                Boolean.valueOf(supportsAuthoJdbc), Boolean.valueOf(supportsAuthoLdap) }));
+        LOG.info(I18nManager.getString("hybrid.realm.infoauth", username + ":*****", Boolean.valueOf(supportsAuthJdbc), Boolean.valueOf(supportsAuthLdap),
+                Boolean.valueOf(supportsAuthoJdbc), Boolean.valueOf(supportsAuthoLdap)));
         
         if (!supportsAuthJdbc && !supportsAuthLdap)
             throw new LoginException(I18nManager.getString("hybrid.realm.withoutauth"));
@@ -128,7 +127,7 @@ public class HybridRealm //extends AppservRealm
         int i = 0;
         for (String g : grpList)
         {
-            LOG.debug("group -> " + g);
+            LOG.info("group -> " + g);
             groups[i++] = g;
         }
         

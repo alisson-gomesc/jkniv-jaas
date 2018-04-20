@@ -74,7 +74,7 @@ public class JdbcAdapterTest
     {
         Properties props = new Properties();
         
-        props.put(JdbcAdapter.PROP_DATASOURCE_JNDI, "jdbc/whinstone");
+        props.put(JdbcAdapter.PROP_DATASOURCE_JNDI, "whinstone");
         //props.put(IASRealm.JAAS_CONTEXT_PARAM, "jdbcRealm");
         props.put(JdbcAdapter.PROP_TABLE_USER_COLUMN_PASSWD, "PASSWD");
         props.put(JdbcAdapter.PROP_TABLE_GROUP, "AUTH_GROUP");

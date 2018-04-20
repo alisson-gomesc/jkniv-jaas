@@ -8,10 +8,8 @@
     <version>0.2.0</version>
   </parent>
   
-  <groupId>net.sf.jkniv</groupId>
   <artifactId>jkniv-jaas-jetty</artifactId>
   <name>jkniv-jaas-jetty</name>
-  <version>0.2.0</version>
   <packaging>jar</packaging>
   <url>http://jkniv.sf.net</url>
   <description>JAAS Hybrid realm module (LDAP and JDBC) for Jetty</description>
@@ -27,7 +25,10 @@
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-jaas</artifactId>
+      <version>9.4.8.v20171121</version>
+      <!-- 
       <version>9.2.0.RC0</version>
+       -->      
       <scope>provided</scope>
     </dependency>
     <dependency>
