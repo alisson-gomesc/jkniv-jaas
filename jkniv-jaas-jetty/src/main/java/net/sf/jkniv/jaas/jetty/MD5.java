@@ -75,21 +75,50 @@ final class MD5 implements Cipher
         return md5Result.toString();
     }
 
+    @Override
     public String decode(String phrase)
     {
         throw new UnsupportedOperationException("Cannot decode ["+ALGO+"] algorithm!");
     }
     
+    @Override
+    public String[] encodeWithSalt(String phrase) throws UnsupportedEncodingException
+    {
+        throw new UnsupportedOperationException("["+ALGO+"] unsupported encode with salt");
+    }
+    
+    @Override
+    public boolean checkCredential(String... credentials)
+    {
+        String plainCredential = credentials[0];
+        String hashedCredential = credentials[1];
+        boolean checked = false;
+        try
+        {
+            return hashedCredential.equals(encode(plainCredential));
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            e.printStackTrace();
+            // TODO e.printStackTrace(); try catch block
+        }
+        return checked;
+    }
+    
+    
+    @Override
     public Charset getCharset()
     {
         return charset;
     }
 
+    @Override
     public String getAlgorithm()
     {
         return ALGO;
     }
     
+    @Override
     public boolean supportDecode()
     {
         return false;

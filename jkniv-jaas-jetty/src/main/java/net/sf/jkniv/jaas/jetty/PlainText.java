@@ -37,26 +37,45 @@ public class PlainText implements Cipher
         this.charset = charset;
     }
 
+    @Override
     public String encode(String phrase) throws UnsupportedEncodingException
     {
         return phrase;
     }
 
+    @Override
     public String decode(String phrase)
     {
         return phrase;
     }
     
+    @Override
+    public String[] encodeWithSalt(String phrase) throws UnsupportedEncodingException
+    {
+        throw new UnsupportedOperationException("["+ALGO+"] unsupported encode with salt");
+    }
+    
+    @Override
+    public boolean checkCredential(String... credentials)
+    {
+        String plainCredential = credentials[0];
+        String hashedCredential = credentials[1];
+        return plainCredential.equals(hashedCredential);
+    }
+    
+    @Override
     public Charset getCharset()
     {
         return charset;
     }
 
+    @Override
     public String getAlgorithm()
     {
         return ALGO;
     }
     
+    @Override
     public boolean supportDecode()
     {
         return true;

@@ -21,6 +21,13 @@ package net.sf.jkniv.jaas.jetty;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 
+import javax.xml.bind.DatatypeConverter;
+
+/**
+ * 
+ * @author Alisson Gomes
+ *
+ */
 interface Cipher
 {
     public static final String MD5 = "MD5";
@@ -36,11 +43,29 @@ interface Cipher
     String encode(String phrase) throws UnsupportedEncodingException;
     
     /**
+     * Encrypt the parameter phrase.
+     * @param  phrase Text to encrypt
+     * @return Return the phrase encrypted at position 0 and salt at position 1.
+     * @throws UnsupportedEncodingException
+     */
+    String[] encodeWithSalt(String phrase) throws UnsupportedEncodingException;
+    
+    /**
      * Uncrypt the parameter phrase.
      * @param phrase Text encrypted to uncrypt
      * @return Return a string clean, without cryptographer
+     * @throws UnsupportedOperationException when the algorithm doesn't supports decode the phrase.
      */
     String decode(String phrase);
+    
+    /**
+     * Verify if two passwords are equals.
+     * @param pair of credentials to check. First parameter it's plain password to be
+     * compared with second encoded. If cipher algorithm use a salt token the 3o parameter
+     * it's the salt. 
+     * @return {@code true} if are equals, {@code false} other wise.
+     */
+    boolean checkCredential(String... credentials);
     
     /**
      * Check if algorithm can uncypher the value.

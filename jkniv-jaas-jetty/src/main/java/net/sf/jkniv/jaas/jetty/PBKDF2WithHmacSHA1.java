@@ -63,11 +63,29 @@ final class PBKDF2WithHmacSHA1 implements Cipher
     @Override
     public String encode(String phrase) throws UnsupportedEncodingException
     {
+        String[] hashs =  encodeWithSalt(phrase);
+        return hashs[0];
+    }
+    
+    @Override
+    public String[] encodeWithSalt(String phrase) throws UnsupportedEncodingException
+    {
+        String[] hashs = new String[2];
         byte[] salt = new byte[SALT_SIZE];
         RANDOM.nextBytes(salt);
         byte[] hash = function(phrase.toCharArray(), salt);
-        return DatatypeConverter.printHexBinary(hash);
-        //return new HashingResult(DatatypeConverter.printHexBinary(hash), DatatypeConverter.printHexBinary(salt));
+        hashs[0] = DatatypeConverter.printHexBinary(hash);
+        hashs[1] = DatatypeConverter.printHexBinary(salt);
+        return hashs;
+    }
+    @Override
+    public boolean checkCredential(String... credentials)
+    {
+        String plainCredential = credentials[0];
+        String hashedCredential = credentials[1];
+        byte[] saltCredential = DatatypeConverter.parseHexBinary(credentials[2]);
+        byte[] hashedUserCredential = function(plainCredential.toCharArray(), saltCredential);
+        return slowEquals(DatatypeConverter.parseHexBinary(hashedCredential), hashedUserCredential);
     }
     
     @Override
