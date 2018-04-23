@@ -1,5 +1,5 @@
 /* 
- * JKNIV ,
+ * JKNIV JAAS,
  * Copyright (C) 2017, the original author or authors.
  *
  * This library is free software; you can redistribute it and/or
@@ -16,50 +16,32 @@
  * License along with this library; if not, write to the Free Software Foundation, Inc., 
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+package net.sf.jkniv.jaas.tomcat;
 
-package net.sf.jkniv.jaas.gf;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-
-final class PlainText implements Cipher
+/**
+ * Exception thrown when a Realm is found to be corrupted for some reason.
+ * 
+ * @author Alisson Gomes
+ */
+public class BadRealmException extends RuntimeException
 {
-    private static final String ALGO = Cipher.PLAIN_TEXT;
-    private Charset charset;
+    /**
+     * Constructs the exception, with descriptive information.
+     *
+     * @param info describes the problem with the realm
+     */
+    public BadRealmException (String info) { super (info); }
     
-    public PlainText()
-    {
-        this(Charset.forName("UTF-8"));
-    }
-
-    public PlainText(Charset charset)
-    {
-        this.charset = charset;
-    }
-
-    public String encode(String phrase) throws UnsupportedEncodingException
-    {
-        return phrase;
-    }
-
-    public String decode(String phrase)
-    {
-        return phrase;
+    public BadRealmException() {
+        super();
     }
     
-    public Charset getCharset()
-    {
-        return charset;
-    }
-
-    public String getAlgorithm()
-    {
-        return ALGO;
+    public BadRealmException(Throwable cause) {
+        super(cause);
     }
     
-    public boolean supportDecode()
-    {
-        return true;
+    public BadRealmException(String info, Throwable cause) {
+        super(info, cause);
     }
-
 }

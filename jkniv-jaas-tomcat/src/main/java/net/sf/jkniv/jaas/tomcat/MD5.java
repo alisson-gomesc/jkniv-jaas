@@ -16,36 +16,69 @@
  * License along with this library; if not, write to the Free Software Foundation, Inc., 
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-package net.sf.jkniv.jaas.jetty;
+
+package net.sf.jkniv.jaas.tomcat;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
-final class PlainText implements Cipher
+final class MD5 implements Cipher
 {
-    private static final String ALGO = Cipher.PLAIN_TEXT;
+    private static final String ALGO = Cipher.MD5;
     private Charset charset;
+    private MessageDigest md5;
     
-    public PlainText()
+    public MD5()
     {
-        this(Charset.forName("UTF-8"));
+        init();
     }
 
-    public PlainText(Charset charset)
+    public MD5(Charset charset)
     {
+        init();
         this.charset = charset;
     }
 
-    @Override
-    public String encode(String phrase) throws UnsupportedEncodingException
+    private void init()
     {
-        return phrase;
+        try
+        {
+            md5 = MessageDigest.getInstance(ALGO);
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            throw new RuntimeException("Cannot get instance of [" + ALGO + "]", e);
+        }
+        this.charset = Charset.forName("UTF8");
+    }
+    
+
+    
+    public synchronized String encode(String phrase) throws UnsupportedEncodingException
+    {
+        StringBuffer md5Result = new StringBuffer();
+        
+        md5.reset();
+        byte[] hash = md5.digest(phrase.getBytes(charset));
+        
+        for (int i = 0; i < hash.length; i++) {
+            if ((0xff & hash[i]) < 0x10) {
+                md5Result.append("0"
+                        + Integer.toHexString((0xFF & hash[i])));
+            } else {
+                md5Result.append(Integer.toHexString(0xFF & hash[i]));
+            }
+        }
+        
+        return md5Result.toString();
     }
 
     @Override
     public String decode(String phrase)
     {
-        return phrase;
+        throw new UnsupportedOperationException("Cannot decode ["+ALGO+"] algorithm!");
     }
     
     @Override
@@ -59,8 +92,19 @@ final class PlainText implements Cipher
     {
         String plainCredential = credentials[0];
         String hashedCredential = credentials[1];
-        return plainCredential.equals(hashedCredential);
+        boolean checked = false;
+        try
+        {
+            return hashedCredential.equals(encode(plainCredential));
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            e.printStackTrace();
+            // TODO e.printStackTrace(); try catch block
+        }
+        return checked;
     }
+    
     
     @Override
     public Charset getCharset()
@@ -77,7 +121,7 @@ final class PlainText implements Cipher
     @Override
     public boolean supportDecode()
     {
-        return true;
+        return false;
     }
 
 }

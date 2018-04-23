@@ -1,5 +1,5 @@
 /* 
- * JKNIV ,
+ * JKNIV JAAS,
  * Copyright (C) 2017, the original author or authors.
  *
  * This library is free software; you can redistribute it and/or
@@ -16,50 +16,41 @@
  * License along with this library; if not, write to the Free Software Foundation, Inc., 
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+package net.sf.jkniv.jaas.jetty;
 
-package net.sf.jkniv.jaas.gf;
-
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-
-final class PlainText implements Cipher
+/**
+ * Factory to create new instance of Ciphers algorithms.
+ * 
+ * @author Alisson Gomes
+ * @since 0.3.0
+ */
+public class CipherFactory
 {
-    private static final String ALGO = Cipher.PLAIN_TEXT;
-    private Charset charset;
-    
-    public PlainText()
+    /**
+     * new instance of MessageDigest for MD5 algorithm.
+     * @return algorithm for MessageDigest MD5
+     */
+    public static Cipher newMD5()
     {
-        this(Charset.forName("UTF-8"));
-    }
-
-    public PlainText(Charset charset)
-    {
-        this.charset = charset;
-    }
-
-    public String encode(String phrase) throws UnsupportedEncodingException
-    {
-        return phrase;
-    }
-
-    public String decode(String phrase)
-    {
-        return phrase;
+        return new MD5();
     }
     
-    public Charset getCharset()
+
+    /**
+     * new instance of MessageDigest for SHA-256 algorithm.
+     * @return algorithm for MessageDigest SHA-256
+     */
+    public static Cipher newSHA256()
     {
-        return charset;
+        return new SHA256();
     }
 
-    public String getAlgorithm()
+    /**
+     * new instance of password-based encryption (PBE) algorithm.
+     * @return algorithm for PBE HMAC-SHA1
+     */
+    public static Cipher newHmacSHA1()
     {
-        return ALGO;
+        return new PBKDF2WithHmacSHA1();
     }
-    
-    public boolean supportDecode()
-    {
-        return true;
-    }
-
 }

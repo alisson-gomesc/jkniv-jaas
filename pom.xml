@@ -18,6 +18,7 @@
   <modules>
     <module>jkniv-jaas-glassfish</module>
     <module>jkniv-jaas-jetty</module>
+    <module>jkniv-jaas-tomcat</module>
   </modules>  
   <distributionManagement>
     <site>
