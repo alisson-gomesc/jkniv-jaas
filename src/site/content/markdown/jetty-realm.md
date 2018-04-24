@@ -105,7 +105,7 @@ Create new file `jetty-install/etc/login.conf` to config the `hybridRealm`. The 
         net.sf.jkniv.jaas.jetty.HybridLoginModule required
         authe-ldap=false
         authe-jdbc=true
-        datasource-jndi=whinstone
+        datasource-jndi="jdbc/myDataSource"
         user-table=AUTH_USER
         user-name-column =USERNAME
         user-password-column =PASSWD
@@ -115,6 +115,7 @@ Create new file `jetty-install/etc/login.conf` to config the `hybridRealm`. The 
         assign-groups=auth;
     };
     
+**Note:** Config file from JAAS treat slash as comments, so to config JNDI name from datasource put the key between double quotes like `"java:/comp/env/jdbc/myDataSource"`    
 
 - Modify the file `jetty-install/etc/jetty-webapp.xml` append a new element `<Call name="addBean">`:
 

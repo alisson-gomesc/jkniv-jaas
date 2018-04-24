@@ -39,6 +39,8 @@ import org.eclipse.jetty.jaas.spi.UserInfo;
 import org.eclipse.jetty.util.log.Logger;
 import org.eclipse.jetty.util.security.Credential;
 
+import net.sf.jkniv.jaas.jetty.I18nManager;
+
 public class HybridLoginModule extends AbstractLoginModule
 {
     private static final Logger    LOG                  = MyLoggerFactory.getLogger(HybridLoginModule.class);
@@ -61,7 +63,7 @@ public class HybridLoginModule extends AbstractLoginModule
             Map<String, ?> options)
     {
         super.initialize(subject, callbackHandler, sharedState, options);
-        //System.out.println("initialize -> " + options);
+        LOG.info(I18nManager.getString("hybrid.realm.init"));
         Properties propsRealm = new Properties();
         propsRealm.putAll(options);
         this._currentRealm = new HybridRealm(propsRealm);

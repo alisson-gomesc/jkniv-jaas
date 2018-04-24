@@ -39,9 +39,8 @@ import com.sun.enterprise.security.auth.realm.IASRealm;
 import com.sun.enterprise.security.auth.realm.InvalidOperationException;
 import com.sun.enterprise.security.auth.realm.NoSuchRealmException;
 import com.sun.enterprise.security.auth.realm.NoSuchUserException;
-import com.sun.enterprise.security.auth.realm.Realm;
 import com.sun.enterprise.util.i18n.StringManager;
-import com.sun.logging.LogDomains;
+
 
 public class HybridRealm extends AppservRealm
 {
@@ -67,6 +66,7 @@ public class HybridRealm extends AppservRealm
     @Override
     public void init(Properties props) throws BadRealmException, NoSuchRealmException
     {
+        LOG.info(i18n.getString("hybrid.realm.init"));
         Properties propsRealm = getProperties();
         this.cacheGroup = new HashMap<String, Vector>();
         this.emptyVector = new Vector<String>();

@@ -68,6 +68,7 @@ public class HybridLoginModule implements LoginModule
     public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState,
             Map<String, ?> options)
     {
+        LOG.info(I18nManager.getString("hybrid.realm.init"));
         this.subject = subject;
         this.callbackHandler= callbackHandler;
         this.sharedState = sharedState;
@@ -85,7 +86,6 @@ public class HybridLoginModule implements LoginModule
     @Override
     public boolean login() throws LoginException
     {
-        LOG.info("login user..");
         try
         {             
             if (callbackHandler == null)

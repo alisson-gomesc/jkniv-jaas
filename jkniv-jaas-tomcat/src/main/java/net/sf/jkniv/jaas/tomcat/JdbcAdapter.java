@@ -103,7 +103,7 @@ class JdbcAdapter
         String columnGroupUserName = props.getProperty(PROP_TABLE_GROUP_COLUMN_USERNAME);
         if (columnGroupUserName == null)
             columnGroupUserName = columunUserName;
-        dsJndi = "java:/comp/env/jdbc/"+props.getProperty(PROP_DATASOURCE_JNDI);
+        dsJndi = props.getProperty(PROP_DATASOURCE_JNDI);
         String cipherAlgoritm = props.getProperty(PROP_CIPHER_PASSWD);
         String charset = props.getProperty(PROP_CHARSET);
         if (charset == null || "".equals(charset.trim()))
