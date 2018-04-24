@@ -1,6 +1,5 @@
 package net.sf.jkniv.jaas.tomcat;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -8,10 +7,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.eclipse.jetty.util.log.Logger;
 
 public class I18nManager
 {
@@ -30,7 +28,7 @@ public class I18nManager
         }
         catch (IOException ex)
         {
-            LOG.warn("Cannot load message properties file: " , ex);
+            LOG.log(Level.WARNING, "Cannot load message properties file: " , ex);
         }
         finally
         {
@@ -42,7 +40,7 @@ public class I18nManager
                 }
                 catch (IOException e)
                 {
-                    LOG.debug("Cannot close input stream from property file" , e);
+                    LOG.log(Level.CONFIG, "Cannot close input stream from property file" , e);
                 }
             }
         }
@@ -54,7 +52,7 @@ public class I18nManager
         Object[] params = Arrays.copyOfRange(args, 1, args.length);
         msg = i18n.getProperty(String.valueOf(args[0]));
         
-        System.out.println(args[0] + " -> "+msg);
+        //System.out.println(args[0] + " -> "+msg);
         String formatted = formatter(msg);
         msg = String.format(formatted, params);
         

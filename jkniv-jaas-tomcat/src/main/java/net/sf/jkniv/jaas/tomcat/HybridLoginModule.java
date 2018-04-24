@@ -20,9 +20,10 @@
 package net.sf.jkniv.jaas.tomcat;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
@@ -32,19 +33,26 @@ import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginException;
+import javax.security.auth.spi.LoginModule;
 
-import org.eclipse.jetty.jaas.callback.ObjectCallback;
-import org.eclipse.jetty.jaas.spi.AbstractLoginModule;
-import org.eclipse.jetty.jaas.spi.UserInfo;
-import org.eclipse.jetty.util.log.Logger;
-import org.eclipse.jetty.util.security.Credential;
+//import org.eclipse.jetty.jaas.callback.ObjectCallback;
+//import org.eclipse.jetty.jaas.spi.UserInfo;
+//import org.eclipse.jetty.util.security.Credential;
 
-public class HybridLoginModule extends AbstractLoginModule
+public class HybridLoginModule implements LoginModule
 {
     private static final Logger    LOG                  = MyLoggerFactory.getLogger(HybridLoginModule.class);
     private HybridRealm _currentRealm;
-    private UserInfo userInfo;
-
+    //private UserInfo userInfo;
+    private Subject subject;
+    private CallbackHandler callbackHandler;
+    private Map<String,?> sharedState;
+    private Map<String,?> options;
+    private boolean authenticated;
+    private boolean commitState = false;
+    
+    private UserPrincipal currentUser;
+    private String[] grpList = null;
     
     /** 
      * Init LoginModule.
@@ -60,8 +68,10 @@ public class HybridLoginModule extends AbstractLoginModule
     public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState,
             Map<String, ?> options)
     {
-        super.initialize(subject, callbackHandler, sharedState, options);
-        System.out.println("initialize -> " + options);
+        this.subject = subject;
+        this.callbackHandler= callbackHandler;
+        this.sharedState = sharedState;
+        this.options = options;
         Properties propsRealm = new Properties();
         propsRealm.putAll(options);
         this._currentRealm = new HybridRealm(propsRealm);
@@ -75,41 +85,34 @@ public class HybridLoginModule extends AbstractLoginModule
     @Override
     public boolean login() throws LoginException
     {
-        CallbackHandler callbackHandler = getCallbackHandler();
         LOG.info("login user..");
         try
-        { 
-            if (isIgnored())
-                return false;
-            
+        {             
             if (callbackHandler == null)
-                throw new LoginException ("No callback handler");
+                throw new LoginException ("Callback handler is null");
 
             Callback[] callbacks = configureCallbacks();
             callbackHandler.handle(callbacks);
 
             String webUserName = ((NameCallback)callbacks[0]).getName();
-            Object webCredential = null;
+            String webCredential = String.valueOf( ((PasswordCallback)callbacks[1]).getPassword());
 
-            webCredential = ((ObjectCallback)callbacks[1]).getObject(); //first check if ObjectCallback has the credential
-            if (webCredential == null)
-                webCredential = ((PasswordCallback)callbacks[2]).getPassword(); //use standard PasswordCallback
-
-            if ((webUserName == null) || (webCredential == null))
+            if (webUserName == null || webCredential == null)
             {
                 LOG.info(I18nManager.getString("hybrid.realm.loginfail", webUserName));
                 setAuthenticated(false);
                 throw new FailedLoginException();
             }
 
-            String[] grpList = _currentRealm.authenticate(webUserName, webCredential.toString());
+            this.grpList = _currentRealm.authenticate(webUserName, webCredential);
+            this.currentUser = new UserPrincipal(webUserName, webCredential);
             
-            userInfo = new UserInfo(webUserName, Credential.getCredential(webCredential.toString()), Arrays.asList(grpList));
+            //userInfo = new UserInfo(webUserName, Credential.getCredential(webCredential.toString()), Arrays.asList(grpList));
 
-            JAASUserInfo currentUser = new JAASUserInfo(userInfo);
-            setCurrentUser(currentUser);
+            //JAASUserInfo currentUser = new JAASUserInfo(userInfo);
+            //setCurrentUser(currentUser);
             setAuthenticated(true);
-            currentUser.fetchRoles();
+            //currentUser.fetchRoles();
             LOG.info(I18nManager.getString("hybrid.realm.login.successfully", webUserName));
         }
         catch (IOException e)
@@ -124,30 +127,98 @@ public class HybridLoginModule extends AbstractLoginModule
         {
             if (e instanceof LoginException)
                 throw (LoginException)e;
+            LOG.log(Level.SEVERE, e.getMessage(), e);
             throw new LoginException (e.toString());
         }
         return true;
     }
     
-    @Override
-    public UserInfo getUserInfo(String _username) throws Exception
+    /**
+     * @see javax.security.auth.spi.LoginModule#commit()
+     * @return true if committed, false if not (likely not authenticated)
+     * @throws LoginException if unable to commit
+     */
+    public boolean commit() throws LoginException
     {
-        return userInfo;
-        /*
-        String[] grpList = null;
-        if (!(_currentRealm instanceof HybridRealm))
-            throw new LoginException(I18nManager.getString("hybrid.jdbc.badrealm"));
-        
-        //HybridRealm realm = (HybridRealm) _currentRealm;
-        
-        grpList = _currentRealm.authenticate(_username, "");
-        
-        //if (LOG.isLoggable(Level.FINER))
-        LOG.info("Hybrid login succeeded for: " + _username + " groups:" + Arrays.toString(grpList));
-        UserInfo userInfo = new UserInfo(_username, Credential.getCredential("123456"), Arrays.asList(grpList));
-        userInfo.fetchRoles();
-        return new UserInfo(_username, Credential.getCredential("123456"), Arrays.asList(grpList));
-        */
+        if (!isAuthenticated())
+        {
+            currentUser = null;
+            setCommitted(false);
+            return false;
+        }
+
+        setCommitted(true);
+        subject.getPrincipals().add(this.currentUser);
+        subject.getPrivateCredentials().add(this.currentUser.getCredential());
+        if (grpList != null)
+        {
+            for(String g : grpList)
+                subject.getPrincipals().add(new RolePrincipal(g));
+        }
+        return true;
+    }
+    
+    /**
+     * @see javax.security.auth.spi.LoginModule#logout()
+     * @return true always
+     * @throws LoginException if unable to logout
+     */
+    public boolean logout() throws LoginException
+    {
+        this.unsetJAASInfo();
+        this.currentUser = null;
+        return true;
+    }
+    
+    
+    /**
+     * @see javax.security.auth.spi.LoginModule#abort()
+     * @throws LoginException if unable to abort
+     */
+    public boolean abort() throws LoginException
+    {
+        this.currentUser = null;
+        return (isAuthenticated() && isCommitted());
+    }
+
+    
+    private Callback[] configureCallbacks ()
+    {
+        Callback[] callbacks = new Callback[2];
+        callbacks[0] = new NameCallback("Enter user name");
+        callbacks[1] = new PasswordCallback("Enter password", false); //only used if framework does not support the ObjectCallback
+        return callbacks;
+    }
+
+    private void setCommitted (boolean commitState)
+    {
+        this.commitState = commitState;
+    }
+    
+    private boolean isCommitted ()
+    {
+        return this.commitState;
+    }
+
+    private void setAuthenticated(boolean authenticated)
+    {
+        this.authenticated = authenticated;
+    }
+
+    private boolean isAuthenticated()
+    {
+        return authenticated;
+    }
+    
+    private void unsetJAASInfo ()
+    {
+        subject.getPrincipals().remove(this.currentUser);
+        subject.getPrivateCredentials().remove(this.currentUser.getCredential());
+        if (grpList != null)
+        {
+            for(String g : grpList)
+                subject.getPrincipals().remove(new RolePrincipal(g));
+        }
     }
 
 }

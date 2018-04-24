@@ -30,12 +30,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.eclipse.jetty.util.log.Logger;
-
-import javax.naming.CompositeName;
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
@@ -172,9 +171,9 @@ class LdapAdapter
         catch (NamingException ex)
         {
             String msg = I18nManager.getString("hybrid.realm.invaliduser", username);
-            LOG.warn(msg);
-            if (LOG.isDebugEnabled())
-                LOG.debug(I18nManager.getString("hybrid.realm.invaliduserpass", username, "***"), ex);
+            LOG.warning(msg);
+            if (LOG.isLoggable(Level.FINER))
+                LOG.finer(I18nManager.getString("hybrid.realm.invaliduserpass", username, "***") + ", cause: " + ex.getMessage());
             
             //throw new LoginException(msg + " [" + ex.getMessage() + "]");
         }
@@ -202,7 +201,7 @@ class LdapAdapter
         }
         catch (NamingException ex)
         {
-            LOG.warn("cannot close ldap context");
+            LOG.warning("cannot close ldap context");
         }
         return auth;
     }
@@ -243,7 +242,7 @@ class LdapAdapter
         }
         catch (NamingException e)
         {
-            LOG.warn(I18nManager.getString("hybrid.ldap.groupsearcherror", userWithDomain), e);
+            LOG.warning(I18nManager.getString("hybrid.ldap.groupsearcherror", userWithDomain) +", cause: "+e.getMessage());
         }
         finally
         {
@@ -291,7 +290,7 @@ class LdapAdapter
         if (directories.length == 0 && defaultDomain != null)
             urlDc.put(defaultDomain, this.domainComponent(defaultDomain));
         
-        LOG.debug("build domain=" + urlDc);
+        LOG.finer("build domain=" + urlDc);
     }
     
     private void checkMandatoryProperties() throws BadRealmException
@@ -321,7 +320,7 @@ class LdapAdapter
             else
                 url = URL_LDAP + url + port;
         }
-        LOG.debug("provider url=" + url);
+        LOG.finer("provider url=" + url);
         return url;
     }
     
@@ -334,7 +333,7 @@ class LdapAdapter
             Attribute attr = (Attribute) ae.next();
             if (attrIDs.contains(attr.getID()))
             {
-                LOG.debug("attribute: " + attr.getID());
+                LOG.finer("attribute: " + attr.getID());
                 NamingEnumeration e = attr.getAll();
                 while (e.hasMore())
                 {
@@ -346,7 +345,7 @@ class LdapAdapter
                         group = matcherCN.group().substring(3);
                         groups.add(group);
                     }
-                    LOG.debug("attr: " + attrValue + ", extract common name as group: " + group);
+                    LOG.finer("attr: " + attrValue + ", extract common name as group: " + group);
                 }
             }
         }
@@ -362,7 +361,7 @@ class LdapAdapter
         if (at < 0 && defaultDomain != null && !"".equals(defaultDomain.trim()))
             userdomain = username + "@" + defaultDomain;
         
-        LOG.debug("user domain=" + userdomain);
+        LOG.finer("user domain=" + userdomain);
         return userdomain;
     }
     

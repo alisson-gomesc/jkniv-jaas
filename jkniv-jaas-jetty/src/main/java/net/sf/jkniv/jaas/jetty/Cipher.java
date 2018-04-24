@@ -21,14 +21,12 @@ package net.sf.jkniv.jaas.jetty;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 
-import javax.xml.bind.DatatypeConverter;
-
 /**
+ * Cipher contract to be used for differents algorithms like MD5, SHA-256...
  * 
  * @author Alisson Gomes
- *
  */
-interface Cipher
+public interface Cipher
 {
     public static final String MD5 = "MD5";
     public static final String SHA256 = "SHA-256";
@@ -46,7 +44,7 @@ interface Cipher
      * Encrypt the parameter phrase.
      * @param  phrase Text to encrypt
      * @return Return the phrase encrypted at position 0 and salt at position 1.
-     * @throws UnsupportedEncodingException
+     * @throws UnsupportedEncodingException when charset encode isn't supported
      */
     String[] encodeWithSalt(String phrase) throws UnsupportedEncodingException;
     
@@ -60,7 +58,7 @@ interface Cipher
     
     /**
      * Verify if two passwords are equals.
-     * @param pair of credentials to check. First parameter it's plain password to be
+     * @param credentials pair of credentials to check. First parameter it's plain password to be
      * compared with second encoded. If cipher algorithm use a salt token the 3o parameter
      * it's the salt. 
      * @return {@code true} if are equals, {@code false} other wise.
@@ -73,7 +71,15 @@ interface Cipher
      */
     boolean supportDecode();
     
+    /**
+     * Charset to be used when encode or decode a phrase
+     * @return charset used
+     */
     Charset getCharset();
     
+    /**
+     * Algorithm used to encode or decode a phrase.
+     * @return name of algorithm
+     */
     String getAlgorithm();
 }

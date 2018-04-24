@@ -54,7 +54,7 @@ public class I18nManager
         Object[] params = Arrays.copyOfRange(args, 1, args.length);
         msg = i18n.getProperty(String.valueOf(args[0]));
         
-        System.out.println(args[0] + " -> "+msg);
+        //System.out.println(args[0] + " -> "+msg);
         String formatted = formatter(msg);
         msg = String.format(formatted, params);
         

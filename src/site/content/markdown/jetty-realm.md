@@ -64,7 +64,7 @@ The hybrid realm are: LDAP and Database. You can use LDAP to authentication and 
 | group-table          |                | table name from user groups |
 | group-name-column    |                | column name from group in the group table |
 | group-table-user-name-column |        | column name from user in the group table |
-| cipher-algorithm     | `SHA256`      | algorithm for enconde password at database |
+| cipher-algorithm     | `SHA256`      | algorithm for encode password at database |
 | charset              | `UTF-8`       | charset encode for password |
 | sql-group            |                | alternative SQL to retrieve the groups from user. Sample: `SELECT GROUP_ID FROM AUTH_GROUP WHERE USERNAME = ? `. The group name must be the first column. |
 | sql-password         |                | alternative SQL to retrieve the password from user. Sample: `SELECT PASSWD FROM AUTH_USER WHERE USERNAME = ? `. The password must be the first column.|
@@ -102,7 +102,17 @@ Create new file `jetty-install/etc/login.conf` to config the `hybridRealm`. The 
 
 
     hybridRealm {
-      net.sf.jkniv.jaas.jetty.HybridLoginModule required;
+        net.sf.jkniv.jaas.jetty.HybridLoginModule required
+        authe-ldap=false
+        authe-jdbc=true
+        datasource-jndi=whinstone
+        user-table=AUTH_USER
+        user-name-column =USERNAME
+        user-password-column =PASSWD
+        group-table =AUTH_GROUP
+        group-name-column =GROUP_ID
+        group-table-user-name-column=USERNAME
+        assign-groups=auth;
     };
     
 

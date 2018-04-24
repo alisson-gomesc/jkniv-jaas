@@ -28,6 +28,7 @@ import java.util.Properties;
 import javax.security.auth.login.LoginException;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import net.sf.jkniv.jaas.tomcat.HybridRealm;
@@ -54,7 +55,7 @@ public class JdbcAdapterTest
             System.out.println(g);
     }
     
-    @Test
+    @Test// @Ignore("prefix java:/comp/env/")
     public void whenAuthenticationIsSuccessfully() throws LoginException 
     {
         JdbcAdapter realm = new JdbcAdapter(getProps());

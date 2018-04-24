@@ -28,17 +28,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.security.auth.login.LoginException;
-
-import org.eclipse.jetty.util.log.Logger;
-//
-//import com.sun.appserv.security.AppservRealm;
-//import com.sun.enterprise.security.auth.realm.IASRealm;
-//import com.sun.enterprise.security.auth.realm.InvalidOperationException;
-//import com.sun.enterprise.security.auth.realm.NoSuchRealmException;
-//import com.sun.enterprise.security.auth.realm.NoSuchUserException;
-//import com.sun.enterprise.util.i18n.StringManager;
 
 public class HybridRealm //extends AppservRealm
 {
@@ -69,10 +62,10 @@ public class HybridRealm //extends AppservRealm
         this.props = props;
         this.jdbcAdapter = new JdbcAdapter(props);
         this.ldapAdapter = new LdapAdapter(props);
-        if (LOG.isDebugEnabled())
+        if (LOG.isLoggable(Level.FINER))
         {
             for (Object k : props.keySet())
-                LOG.debug(k + "=" + props.get(k));
+                LOG.finer(k + "=" + props.get(k));
         }
         // Pass the properties declared in the console to the system
         //String ctxParam = props.getProperty(IASRealm.JAAS_CONTEXT_PARAM);

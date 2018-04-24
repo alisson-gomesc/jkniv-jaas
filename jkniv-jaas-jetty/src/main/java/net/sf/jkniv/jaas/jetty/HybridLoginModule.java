@@ -61,7 +61,7 @@ public class HybridLoginModule extends AbstractLoginModule
             Map<String, ?> options)
     {
         super.initialize(subject, callbackHandler, sharedState, options);
-        System.out.println("initialize -> " + options);
+        //System.out.println("initialize -> " + options);
         Properties propsRealm = new Properties();
         propsRealm.putAll(options);
         this._currentRealm = new HybridRealm(propsRealm);

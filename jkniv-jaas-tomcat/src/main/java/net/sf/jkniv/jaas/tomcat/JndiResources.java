@@ -20,10 +20,10 @@
 package net.sf.jkniv.jaas.tomcat;
 
 
+import java.util.logging.Logger;
+
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-
-import org.eclipse.jetty.util.log.Logger;
 
 /**
  * JNDI resource access.
@@ -57,7 +57,7 @@ class JndiResources
         }
         catch (NamingException e)
         {
-            LOG.warn("Cannot localize the jndi name [" + value + "]: " + e.getMessage());
+            LOG.warning("Cannot localize the jndi name [" + value + "]: " + e.getMessage());
         }
         return o;
     }

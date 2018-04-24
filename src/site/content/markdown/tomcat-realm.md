@@ -63,108 +63,141 @@ The hybrid realm are: LDAP and Database. You can use LDAP to authentication and 
 | group-table          |                | table name from user groups |
 | group-name-column    |                | column name from group in the group table |
 | group-table-user-name-column |        | column name from user in the group table |
-| cipher-algorithm     | `SHA256`      | algorithm for enconde password at database |
+| cipher-algorithm     | `SHA256`      | algorithm for encode password at database |
 | charset              | `UTF-8`       | charset encode for password |
 | sql-group            |                | alternative SQL to retrieve the groups from user. Sample: `SELECT GROUP_ID FROM AUTH_GROUP WHERE USERNAME = ? `. The group name must be the first column. |
 | sql-password         |                | alternative SQL to retrieve the password from user. Sample: `SELECT PASSWD FROM AUTH_USER WHERE USERNAME = ? `. The password must be the first column.|
 | sql-succeeded        |                | An update or insert sql for execute when authenticate login succeeded. |
 | sql-failed           |                | An update or insert sql for execute when authenticate login failure. |
 
-Sample JDBC tables to authenticate and authorizate users:
+Sample JDBC tables to authenticate and authorize users:
 
     CREATE TABLE "AUTH_USER" 
     ( 
       "USERNAME" VARCHAR2(60) NOT NULL ENABLE, 
       "PASSWD" VARCHAR2(128) NOT NULL ENABLE, 
       CONSTRAINT "PK_USER" PRIMARY KEY ("USERNAME")
-    )
-
+    );
 
     CREATE TABLE "AUTH_GROUP" 
     (    
       "USERNAME" VARCHAR2(60) NOT NULL ENABLE, 
       "GROUP_ID" VARCHAR2(30) NOT NULL ENABLE, 
       CONSTRAINT "PK_GROUP" PRIMARY KEY ("USERNAME", "GROUP_ID")
-    )
+    );
+       
+    INSERT INTO AUTH_USER VALUES ('admin@localhost', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918');
+   
+    INSERT INTO AUTH_GROUP VALUES ('admin@localhost', 'admins');
     
     
+The password `8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918` is cipher with SHA-256 the plain value is `admin`.
+     
+     
 #### Configure Custom Realm for Tomcat  
 
-Copy the jar files to domain lib `tomcat-install/lib` from Tomcat:
- - `jkniv-jaas-tomcat.jar` to domain lib 
+Copy the jar files to common lib `tomcat-install/lib` from Tomcat:
+ 
+ - `jkniv-jaas-tomcat.jar` 
 
 
-Create new file `tomcat-install/etc/login.conf` to config the `hybridRealm`. The name `hybridRealm` must be the same value for `LoginModuleName` at Hybrid Realm Properties.
+Create new file `tomcat-install/etc/login.conf` to config the `hybridRealm`. The name `hybridRealm` must be the same value from *appName* attribute `<Realm appName="hybridRealm"` at `server.xml`.
 
 
     hybridRealm {
-      net.sf.jkniv.jaas.tomcat.HybridLoginModule required;
+        net.sf.jkniv.jaas.tomcat.HybridLoginModule required
+        authe-ldap=false
+        authe-jdbc=true
+        datasource-jndi=whinstone
+        user-table=AUTH_USER
+        user-name-column =USERNAME
+        user-password-column =PASSWD
+        group-table =AUTH_GROUP
+        group-name-column =GROUP_ID
+        group-table-user-name-column=USERNAME
+        assign-groups=auth;
+    };
+
+    
+
+- Modify the file `tomcat-install/conf/server.xml` append a new ream `<Realm` element:
+
+
+    <Engine defaultHost="localhost" name="Catalina">
+      ...
+      <Realm className="org.apache.catalina.realm.JAASRealm"
+        appName="hybridRealm"
+        userClassNames="net.sf.jkniv.jaas.tomcat.UserPrincipal"
+        roleClassNames="net.sf.jkniv.jaas.tomcat.RolePrincipal">
+      </Realm>
+    </Engine>
+
+- Modify `web.xml` from your application configuring the new realm `acme-realm`:
+    
+     <security-role>
+      <description>Any user authenticated</description>
+      <role-name>auth</role-name>
+     </security-role>  
+      <login-config> 
+       <auth-method>FORM</auth-method> 
+       <realm-name>acme-realm</realm-name> 
+       <form-login-config> 
+        <form-login-page>/login.html</form-login-page> 
+        <form-error-page>/error.html</form-error-page> 
+       </form-login-config> 
+      </login-config> 
+      <security-constraint>
+        <web-resource-collection>
+          <web-resource-name>Exclude from Security</web-resource-name>
+          <url-pattern>/api/*</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+         <role-name>auth</role-name>
+        </auth-constraint>
+      </security-constraint>
+
+    
+- start Tomcat (Go forest, go)
+
+*Note:* If [Enable Single Sign On for Tomcat][5] it's a requirement uncomment the `<Valve>`element from `tomcat-install/conf/server.xml` file.
+
+
+    <Host name="localhost" ...>
+     ...
+     <Valve className="org.apache.catalina.authenticator.SingleSignOn"/>
+     ...
+    </Host>
+    
+## Sample login.conf for LDAP ONLY
+
+    hybridRealm {
+        net.sf.jkniv.jaas.tomcat.HybridLoginModule required
+        authe-ldap=true
+        autho-ldap=true
+        autho-jdbc=false
+        group-member-attr=memberOf
+        directories=acme.com.br;
     };
     
+## Sample login.conf for RDBMS ONLY
 
-- Modify the file `tomcat-install/etc/tomcat-webapp.xml` append a new element `<Call name="addBean">`:
+    hybridRealm {
+        net.sf.jkniv.jaas.tomcat.HybridLoginModule required
+        authe-ldap=false
+        authe-jdbc=true
+        autho-jdbc=true
+        datasource-jndi=whinstone
+        user-table=AUTH_USER
+        user-name-column =USERNAME
+        user-password-column =PASSWD
+        group-table =AUTH_GROUP
+        group-name-column =GROUP_ID
+        group-table-user-name-column=USERNAME
+    };
 
-
-    <Configure id="Server" class="org.eclipse.jetty.server.Server">
-      ...
-      <Call name="addBean">
-        <Arg>
-          <New class="org.eclipse.jetty.jaas.JAASLoginService">
-            <Set name="name">acme-realm</Set>
-            <Set name="LoginModuleName">hybridRealm</Set>
-          </New>
-        </Arg>
-      </Call>    
-    </Configure>
-
-- Enter into glassfish console to config the custom realm and add new realm.
-
-
-Enable security via jaas, and configure it
-
-    --module=jaas
-    jetty.jaas.login.conf=etc/login.conf
-    
-- start Jetty.
-
-
-![Glassfish realm properties](realm-config.png)
-
-
-- Add the properties conform your database and ldap properties. The realm name must be the same used at `<login-config>` from web.xml, and class name must be `net.sf.jkniv.jaas.tomcat.HybridRealm`.
-
-![Glassfish realm properties](props-config.png)
-
-
-- Sample entry at `glass-install\glassfish4\glassfish\domains\domain1\config\domain.xml`: 
-
-    <security-service>
-        <auth-realm classname="net.sf.jkniv.jaas.gf.HybridRealm" name="acme-realm">
-          <property name="group-member-attr" value="memberOf"></property>
-          <property name="assign-groups" value="auth"></property>
-          <property name="sql-group" value="select role from ROLES where login = ? order by role"></property>
-          <property name="directories" value="acme.com.br,acme.com,another.com"></property>
-          <property name="datasource-jndi" value="jdbc/myDS"></property>
-          <property name="jaas-context" value="hybridRealm"></property>
-          <property name="default-domain" value="acme.com"></property>
-        </auth-realm>
-    </security-service>
-    
-    
-- Sample web.xml from web application
-
-
-    <login-config>
-      <auth-method>FORM</auth-method>
-      <realm-name>acme-realm</realm-name>
-      <form-login-config>
-        <form-login-page>/login.html</form-login-page>
-        <form-error-page>/error.html</form-error-page>
-      </form-login-config>
-    </login-config>
-      
-
-    
-    
-[1] https://tomcat.apache.org/tomcat-7.0-doc/realm-howto.html "Configuring Tomcat JAAS"
-[2] https://tomcat.apache.org/tomcat-7.0-doc/config/host.html#Single%20Sign%20On "SSO Tomcat"    
+        
+[1]: https://tomcat.apache.org/tomcat-7.0-doc/realm-howto.html                                              "Configuring Tomcat JAAS"
+[2]: https://tomcat.apache.org/tomcat-7.0-doc/config/host.html#Single%20Sign%20On                           "SSO Tomcat"    
+[3]: https://docs.oracle.com/javase/7/docs/technotes/guides/security/jaas/tutorials/LoginConfigFile.html    "JAAS Login Configuration File"
+[4]: https://docs.oracle.com/javase/7/docs/api/javax/security/auth/login/Configuration.html                 "Login Configuration"
+[5]: http://tomcat.apache.org/tomcat-8.0-doc/config/host.html#Single_Sign_On                                "Enable Single Sign On for Tomcat"

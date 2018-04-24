@@ -44,7 +44,7 @@ public class JndiCreator
             datasource.setUsername("whinstone");
             datasource.setPassword("whinstone");
             final SimpleNamingContextBuilder builder = new SimpleNamingContextBuilder();
-            builder.bind("jdbc/whinstone",datasource);
+            builder.bind("java:/comp/env/jdbc/whinstone",datasource);
             builder.activate();
         }
         catch (NamingException ex)

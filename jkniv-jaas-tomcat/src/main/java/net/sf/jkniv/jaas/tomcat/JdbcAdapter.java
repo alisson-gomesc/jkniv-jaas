@@ -28,8 +28,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-
-import org.eclipse.jetty.util.log.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.security.auth.login.LoginException;
 import javax.sql.DataSource;
@@ -103,7 +103,7 @@ class JdbcAdapter
         String columnGroupUserName = props.getProperty(PROP_TABLE_GROUP_COLUMN_USERNAME);
         if (columnGroupUserName == null)
             columnGroupUserName = columunUserName;
-        dsJndi = "jdbc/"+props.getProperty(PROP_DATASOURCE_JNDI);
+        dsJndi = "java:/comp/env/jdbc/"+props.getProperty(PROP_DATASOURCE_JNDI);
         String cipherAlgoritm = props.getProperty(PROP_CIPHER_PASSWD);
         String charset = props.getProperty(PROP_CHARSET);
         if (charset == null || "".equals(charset.trim()))
@@ -203,9 +203,9 @@ class JdbcAdapter
         catch (Exception ex)
         {
             String msg = I18nManager.getString("hybrid.jdbc.grouperror", user);
-            LOG.warn(msg);
-            if (LOG.isDebugEnabled())
-                LOG.debug(msg, ex);
+            LOG.log(Level.WARNING, msg);
+            if (LOG.isLoggable(Level.FINER))
+                LOG.finer(msg + " " + ex.toString());
         }
         finally
         {
@@ -246,7 +246,7 @@ class JdbcAdapter
         try
         {
             connection = getConnection();
-            LOG.debug(sqlPasswd);
+            LOG.finer(sqlPasswd);
             statement = connection.prepareStatement(sqlPasswd);
             int nroParams = countParams(sqlPasswd);
             for(int i=0; i<nroParams; i++)
@@ -265,13 +265,13 @@ class JdbcAdapter
         catch (SQLException ex)
         {
             String msg = I18nManager.getString("hybrid.realm.invaliduser", username);
-            LOG.warn(msg);
-            if (LOG.isDebugEnabled())
-                LOG.debug(I18nManager.getString("hybrid.realm.invaliduserpass", username, "***"), ex);
+            LOG.warning(msg);
+            if (LOG.isLoggable(Level.FINER))
+                LOG.finer(I18nManager.getString("hybrid.realm.invaliduserpass", username, "***") + ", cause: " +ex.getMessage());
         }
         catch (UnsupportedEncodingException e)
         {
-            LOG.warn(I18nManager.getString("hybrid.jdbc.cypher", username), e);
+            LOG.warning(I18nManager.getString("hybrid.jdbc.cypher", username)+ ", cause: " +  e.getMessage());
         }
         finally
         {
@@ -290,7 +290,7 @@ class JdbcAdapter
         try
         {
             connection = getConnection();
-            LOG.debug(sqlForSucceeded);
+            LOG.finer(sqlForSucceeded);
             int nroParams = countParams(sqlForSucceeded);
             statement = connection.prepareStatement(sqlForSucceeded);
             for(int i=0;i<nroParams; i++)
@@ -301,9 +301,9 @@ class JdbcAdapter
         catch (Exception ex)
         {
             String msg = I18nManager.getString("hybrid.jdbc.sqlerror", "sql-succeeded", user);
-            LOG.warn(msg);
-            if (LOG.isDebugEnabled())
-                LOG.debug(msg, ex);
+            LOG.warning(msg);
+            if (LOG.isLoggable(Level.FINER))
+                LOG.finer(msg +", cause: "+ex.getMessage());
         }
         finally
         {
@@ -321,7 +321,7 @@ class JdbcAdapter
         try
         {
             connection = getConnection();
-            LOG.debug(sqlForFailed);
+            LOG.finer(sqlForFailed);
             int nroParams = countParams(sqlForFailed);
             statement = connection.prepareStatement(sqlForFailed);
             for(int i=0;i<nroParams; i++)
@@ -332,9 +332,9 @@ class JdbcAdapter
         catch (Exception ex)
         {
             String msg = I18nManager.getString("hybrid.jdbc.sqlerror", "sql-failed", user);
-            LOG.warn(msg);
-            if (LOG.isDebugEnabled())
-                LOG.debug(msg, ex);
+            LOG.warning(msg);
+            if (LOG.isLoggable(Level.FINER))
+                LOG.finer(msg +", cause: "+ ex.getMessage());
         }
         finally
         {

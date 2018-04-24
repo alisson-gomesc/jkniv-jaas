@@ -20,14 +20,13 @@
 package net.sf.jkniv.jaas.tomcat;
 
 
-import org.eclipse.jetty.util.log.Log;
-import org.eclipse.jetty.util.log.Logger;
+import java.util.logging.Logger;
 
 class MyLoggerFactory
 {
     public static Logger getLogger(Class clazz)
     {
-        return Log.getLogger(clazz);
+        return Logger.getLogger(clazz.getName());
     }
     
 }

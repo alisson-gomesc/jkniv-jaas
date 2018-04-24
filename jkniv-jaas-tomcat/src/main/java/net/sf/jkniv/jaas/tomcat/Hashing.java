@@ -46,7 +46,7 @@ final class Hashing
         {
             PBEKeySpec spec = new PBEKeySpec(password, salt, ITERATIONS, HASH_SIZE * Byte.SIZE);
             SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-            System.out.println("Algorithm: "+ factory.getProvider().getName());
+            //System.out.println("Algorithm: "+ factory.getProvider().getName());
             return factory.generateSecret(spec).getEncoded();
         }
         catch (GeneralSecurityException error)
