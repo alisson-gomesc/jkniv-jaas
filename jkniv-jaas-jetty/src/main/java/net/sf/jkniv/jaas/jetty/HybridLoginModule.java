@@ -39,7 +39,7 @@ import org.eclipse.jetty.jaas.spi.UserInfo;
 import org.eclipse.jetty.util.log.Logger;
 import org.eclipse.jetty.util.security.Credential;
 
-import net.sf.jkniv.jaas.jetty.I18nManager;
+import net.sf.jkniv.jaas.I18nManager;
 
 public class HybridLoginModule extends AbstractLoginModule
 {

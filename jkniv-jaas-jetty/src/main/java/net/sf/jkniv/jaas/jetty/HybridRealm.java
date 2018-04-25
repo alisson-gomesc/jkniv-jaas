@@ -40,6 +40,10 @@ import org.eclipse.jetty.util.log.Logger;
 //import com.sun.enterprise.security.auth.realm.NoSuchUserException;
 //import com.sun.enterprise.util.i18n.StringManager;
 
+import net.sf.jkniv.jaas.I18nManager;
+import net.sf.jkniv.jaas.JdbcAdapter;
+import net.sf.jkniv.jaas.LdapAdapter;
+
 public class HybridRealm //extends AppservRealm
 {
     private static final Logger        LOG                  = MyLoggerFactory.getLogger(HybridRealm.class);
@@ -67,6 +71,7 @@ public class HybridRealm //extends AppservRealm
         this.cacheGroup = new HashMap<String, Vector>();
         this.emptyVector = new Vector<String>();
         this.props = props;
+        System.out.println("new JdbcAdapter...");
         this.jdbcAdapter = new JdbcAdapter(props);
         this.ldapAdapter = new LdapAdapter(props);
         if (LOG.isDebugEnabled())

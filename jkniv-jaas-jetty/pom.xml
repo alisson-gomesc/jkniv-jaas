@@ -1,13 +1,14 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  
-  
+
+
   <parent>
     <groupId>net.sf.jkniv</groupId>
     <artifactId>jkniv-jaas</artifactId>
     <version>0.3.0</version>
   </parent>
-  
+
   <artifactId>jkniv-jaas-jetty</artifactId>
   <name>jkniv-jaas-jetty</name>
   <packaging>jar</packaging>
@@ -16,19 +17,22 @@
 
   <properties>
     <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>  
+    <maven.compiler.target>1.8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
 
   <dependencies>
     <dependency>
+      <groupId>net.sf.jkniv</groupId>
+      <artifactId>jkniv-jaas-common</artifactId>
+      <version>0.3.0</version>
+    </dependency>
+    <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-jaas</artifactId>
       <version>9.4.8.v20171121</version>
-      <!-- 
-      <version>9.2.0.RC0</version>
-       -->      
+      <!-- <version>9.2.0.RC0</version> -->
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -64,7 +68,6 @@
       <version>${spring.version}</version>
       <scope>test</scope>
     </dependency>
-    
     <dependency>
       <groupId>commons-dbcp</groupId>
       <artifactId>commons-dbcp</artifactId>
@@ -107,7 +110,7 @@
       <artifactId>mockito-core</artifactId>
       <version>2.12.0</version>
       <scope>test</scope>
-    </dependency>    
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -120,7 +123,33 @@
           <outputDirectory>target/generated-site/${project.artifactId}</outputDirectory>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.1.1</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <!-- Building a flat jar file -->
+            <configuration>
+              <filters>
+                <filter>
+                  <artifact>net.sf.jkniv:jkniv-jaas-common</artifact>
+                  <includes>
+                    <include>net/sf/jkniv/jaas/**</include>
+                    <include>*.properties</include>
+                  </includes>
+                </filter>
+              </filters>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
     </plugins>
   </build>
-  
+
 </project>

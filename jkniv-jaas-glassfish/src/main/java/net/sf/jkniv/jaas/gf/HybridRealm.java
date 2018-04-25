@@ -41,6 +41,9 @@ import com.sun.enterprise.security.auth.realm.NoSuchRealmException;
 import com.sun.enterprise.security.auth.realm.NoSuchUserException;
 import com.sun.enterprise.util.i18n.StringManager;
 
+import net.sf.jkniv.jaas.JdbcAdapter;
+import net.sf.jkniv.jaas.LdapAdapter;
+
 
 public class HybridRealm extends AppservRealm
 {

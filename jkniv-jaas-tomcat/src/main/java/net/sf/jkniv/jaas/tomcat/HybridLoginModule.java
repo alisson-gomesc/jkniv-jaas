@@ -35,6 +35,8 @@ import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 
+import net.sf.jkniv.jaas.I18nManager;
+
 //import org.eclipse.jetty.jaas.callback.ObjectCallback;
 //import org.eclipse.jetty.jaas.spi.UserInfo;
 //import org.eclipse.jetty.util.security.Credential;

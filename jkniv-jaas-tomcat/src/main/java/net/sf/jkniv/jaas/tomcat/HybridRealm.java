@@ -33,6 +33,10 @@ import java.util.logging.Logger;
 
 import javax.security.auth.login.LoginException;
 
+import net.sf.jkniv.jaas.I18nManager;
+import net.sf.jkniv.jaas.JdbcAdapter;
+import net.sf.jkniv.jaas.LdapAdapter;;
+
 public class HybridRealm //extends AppservRealm
 {
     private static final Logger        LOG                  = MyLoggerFactory.getLogger(HybridRealm.class);
