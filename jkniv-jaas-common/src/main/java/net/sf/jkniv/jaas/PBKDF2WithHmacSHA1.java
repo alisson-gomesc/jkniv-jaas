@@ -162,4 +162,10 @@ final class PBKDF2WithHmacSHA1 implements Cipher
         }
     }
 
+    @Override
+    public boolean hasSalt()
+    {
+        return true;
+    }
+
 }

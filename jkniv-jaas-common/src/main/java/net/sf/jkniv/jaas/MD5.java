@@ -118,4 +118,10 @@ final class MD5 implements Cipher
         return false;
     }
 
+    @Override
+    public boolean hasSalt()
+    {
+        return false;
+    }
+
 }

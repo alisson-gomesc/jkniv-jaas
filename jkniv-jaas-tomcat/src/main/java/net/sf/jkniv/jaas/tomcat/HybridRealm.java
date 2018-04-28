@@ -33,6 +33,7 @@ import java.util.logging.Logger;
 
 import javax.security.auth.login.LoginException;
 
+import net.sf.jkniv.jaas.CouchDbAdapter;
 import net.sf.jkniv.jaas.I18nManager;
 import net.sf.jkniv.jaas.JdbcAdapter;
 import net.sf.jkniv.jaas.LdapAdapter;;
@@ -44,16 +45,21 @@ public class HybridRealm //extends AppservRealm
     //private static final String        DEFAULT_JAAS_CONTEXT = "hybrid-jaas-context";
     public static final String         PROP_AUTH_TYPE_JDBC  = "authe-jdbc";
     public static final String         PROP_AUTH_TYPE_LDAP  = "authe-ldap";
+    public static final String         PROP_AUTH_TYPE_COUCHDB = "authe-couchdb";
     public static final String         PROP_AUTHO_TYPE_JDBC = "autho-jdbc";
     public static final String         PROP_AUTHO_TYPE_LDAP = "autho-ldap";
+    public static final String         PROP_AUTHO_TYPE_COUCHDB = "autho-couchdb";
     public static final String         PROP_ASSIGN_GROUPS   = "assign-groups";
     public static final String         PROP_AUTH_TYPE       = "hybrid+ldap+jdbc";
     private JdbcAdapter                jdbcAdapter;
     private LdapAdapter                ldapAdapter;
+    private CouchDbAdapter             couchDbAdapter;
     private boolean                    supportsAuthLdap;
     private boolean                    supportsAuthoLdap;
     private boolean                    supportsAuthJdbc;
     private boolean                    supportsAuthoJdbc;
+    private boolean                    supportsAuthCouch;
+    private boolean                    supportsAuthoCouch;
     private Map<String, Vector>        cacheGroup;
     private Vector<String>             emptyVector;
     private Properties props;
@@ -66,6 +72,7 @@ public class HybridRealm //extends AppservRealm
         this.props = props;
         this.jdbcAdapter = new JdbcAdapter(props);
         this.ldapAdapter = new LdapAdapter(props);
+        this.couchDbAdapter = new CouchDbAdapter(props);
         if (LOG.isLoggable(Level.FINER))
         {
             for (Object k : props.keySet())
@@ -80,8 +87,10 @@ public class HybridRealm //extends AppservRealm
         
         this.supportsAuthLdap = Boolean.valueOf(props.getProperty(PROP_AUTH_TYPE_LDAP, "true"));
         this.supportsAuthJdbc = Boolean.valueOf(props.getProperty(PROP_AUTH_TYPE_JDBC, "false"));
+        this.supportsAuthCouch = Boolean.valueOf(props.getProperty(PROP_AUTH_TYPE_COUCHDB, "false"));
         this.supportsAuthoLdap = Boolean.valueOf(props.getProperty(PROP_AUTHO_TYPE_LDAP, "false"));
         this.supportsAuthoJdbc = Boolean.valueOf(props.getProperty(PROP_AUTHO_TYPE_JDBC, "true"));
+        this.supportsAuthoCouch = Boolean.valueOf(props.getProperty(PROP_AUTHO_TYPE_COUCHDB, "false"));
     }
     
     //public String[] authenticate(String username) throws LoginException
@@ -91,7 +100,7 @@ public class HybridRealm //extends AppservRealm
         //String password = String.valueOf(_password);
         boolean authLdap = false;
         boolean authJdbc = false;
-        
+        boolean authCouch = false;
         //        LOG.log(Level.FINEST,"LEVEL FINEST");
         //        LOG.log(Level.FINER,"LEVEL FINER");
         //        LOG.log(Level.FINE,"LEVEL FINE");
@@ -111,8 +120,11 @@ public class HybridRealm //extends AppservRealm
         
         if (supportsAuthJdbc && !authLdap)
             authJdbc = jdbcAdapter.authenticate(username, password);
-        
-        if (!authLdap && !authJdbc)
+
+        if (supportsAuthCouch && !authLdap && !authJdbc)
+            authCouch = couchDbAdapter.authenticate(username, password);
+
+        if (!authLdap && !authJdbc && !authCouch)
         {
             jdbcAdapter.logForFailed(username);
             throw new LoginException(I18nManager.getString("hybrid.realm.loginfail", username));

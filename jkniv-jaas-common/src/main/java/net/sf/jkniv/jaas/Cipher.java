@@ -31,6 +31,7 @@ public interface Cipher
     public static final String MD5 = "MD5";
     public static final String SHA256 = "SHA-256";
     public static final String PLAIN_TEXT = "PLAIN_TEXT";
+    public static final String CODE_HMACSHA1 = "HMACSHA1";
     public static final String HMACSHA1 = "PBKDF2WithHmacSHA1";
     /**
      * Encrypt the parameter phrase.
@@ -82,4 +83,10 @@ public interface Cipher
      * @return name of algorithm
      */
     String getAlgorithm();
+    
+    /**
+     * Identify when an algorithm use salt at password
+     * @return {@code true} when the algorithm use salt to cipher the password, {@code false} otherwise
+     */
+    boolean hasSalt();
 }

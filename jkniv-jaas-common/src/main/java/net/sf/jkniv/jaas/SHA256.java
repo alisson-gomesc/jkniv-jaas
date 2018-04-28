@@ -121,4 +121,10 @@ final class SHA256 implements Cipher
         return false;
     }
 
+    @Override
+    public boolean hasSalt()
+    {
+        return false;
+    }
+
 }

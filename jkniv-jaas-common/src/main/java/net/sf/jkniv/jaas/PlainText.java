@@ -80,4 +80,10 @@ final class PlainText implements Cipher
         return true;
     }
 
+    @Override
+    public boolean hasSalt()
+    {
+        return false;
+    }
+
 }
