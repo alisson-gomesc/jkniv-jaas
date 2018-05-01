@@ -63,7 +63,7 @@ The hybrid realm are: LDAP and Database. You can use LDAP to authentication and 
 | group-table          |                | table name from user groups |
 | group-name-column    |                | column name from group in the group table |
 | group-table-user-name-column |        | column name from user in the group table |
-| cipher-algorithm     | `SHA256`      | algorithm for encode password at database |
+| cipher-algorithm     | `SHA-256`      | algorithm for encode password at database values: `SHA-256`, `MD5`, `HMACSHA1` or `PLAIN_TEXT`|
 | charset              | `UTF-8`       | charset encode for password |
 | sql-group            |                | alternative SQL to retrieve the groups from user. Sample: `SELECT GROUP_ID FROM AUTH_GROUP WHERE USERNAME = ? `. The group name must be the first column. |
 | sql-password         |                | alternative SQL to retrieve the password from user. Sample: `SELECT PASSWD FROM AUTH_USER WHERE USERNAME = ? `. The password must be the first column.|
@@ -94,14 +94,25 @@ Sample JDBC tables to authenticate and authorize users:
 The password `8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918` is cipher with SHA-256 the plain value is `admin`.
      
      
+#### CouchDb Properties
+
+| Property             | Default        | Description   |
+|----------------------|----------------|---------------|
+| url                  |                | CouchDb URL like: http://127.0.0.1:5984/mydatabase |
+| user                 |                | Username to connect in couchdb database |
+| password             |                | Password to connect in couchdb database |
+| user-password-column |                | column name from the user password |
+| salt-column          |                | column name from salt |
+| group-name-column    |                | column name from users role |
+| cipher-algorithm     | `SHA-256`     | algorithm for encode password at database values: `SHA-256`, `MD5`, `HMACSHA1` or `PLAIN_TEXT`|
+| charset              | `UTF-8`       | charset encode for password |
+     
+     
 #### Configure Custom Realm for Tomcat  
 
-Copy the jar files to common lib `tomcat-install/lib` from Tomcat:
+Copy the jar files `jkniv-jaas-tomcat.jar` to common lib `tomcat-install/lib` from Tomcat:
  
- - `jkniv-jaas-tomcat.jar` 
-
-
-Create new file `tomcat-install/etc/login.conf` to config the `hybridRealm`. The name `hybridRealm` must be the same value from *appName* attribute `<Realm appName="hybridRealm"` at `server.xml`.
+Create new file `tomcat-install/etc/login.conf` to config the `hybridRealm`. The name `hybridRealm` must be the same value from *appName* attribute `<Realm appName="hybridRealm"` in `server.xml`.
 
 
     hybridRealm {
@@ -168,24 +179,24 @@ Create new file `tomcat-install/etc/login.conf` to config the `hybridRealm`. The
      ...
     </Host>
     
-## Sample login.conf for LDAP ONLY
+    
+### Sample login.conf for LDAP ONLY
 
     hybridRealm {
         net.sf.jkniv.jaas.tomcat.HybridLoginModule required
-        authe-ldap=true
         autho-ldap=true
         autho-jdbc=false
         group-member-attr=memberOf
         directories=acme.com.br;
     };
     
-## Sample login.conf for RDBMS ONLY
+    
+### Sample login.conf for RDBMS ONLY
 
     hybridRealm {
         net.sf.jkniv.jaas.tomcat.HybridLoginModule required
         authe-ldap=false
         authe-jdbc=true
-        autho-jdbc=true
         datasource-jndi="java:/comp/env/jdbc/myDataSource"
         user-table=AUTH_USER
         user-name-column =USERNAME
@@ -194,6 +205,22 @@ Create new file `tomcat-install/etc/login.conf` to config the `hybridRealm`. The
         group-name-column =GROUP_ID
         group-table-user-name-column=USERNAME
     };
+
+
+### Sample login.conf for COUCHDB ONLY
+
+    hybridRealm {
+        net.sf.jkniv.jaas.tomcat.HybridLoginModule required
+        authe-ldap=false
+        autho-jdbc=false
+        authe-couchdb=false
+        authe-couchdb=true
+        url="http://127.0.0.1:5984/myusers"
+        user-password-column=passwd
+        group-name-column=roles
+        salt-column=passsalt;
+    };
+
 
         
 [1]: https://tomcat.apache.org/tomcat-7.0-doc/realm-howto.html                                              "Configuring Tomcat JAAS"

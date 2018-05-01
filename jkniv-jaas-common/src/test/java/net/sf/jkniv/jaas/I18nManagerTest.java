@@ -75,8 +75,8 @@ public class I18nManagerTest
     {
         //hybrid.realm.infoauth=try to authenticate user {1}, supportsAuthJdbc={2}, supportsAuthLdap={3}, supportsAuthoJdbc={4}, supportsAuthoLdap={5}
         String s = I18nManager.getString("hybrid.realm.infoauth", "mary:*****", Boolean.valueOf(true), Boolean.valueOf(false),
-                        Boolean.valueOf(false), Boolean.valueOf(true));
-        assertThat(s, is("try to authenticate user mary:*****, supportsAuthJdbc=true, supportsAuthLdap=false, supportsAuthoJdbc=false, supportsAuthoLdap=true"));
+                        Boolean.valueOf(false), Boolean.valueOf(true), Boolean.valueOf(false), Boolean.valueOf(false));
+        assertThat(s, is("try to authenticate user mary:*****, supportsAuthJdbc=true, supportsAuthLdap=false, supportsAuthoJdbc=false, supportsAuthoLdap=true, supportsAuthCouchDb=false, supportsAuthoLdap=false"));
     }
     
     @Test

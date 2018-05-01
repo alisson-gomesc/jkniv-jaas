@@ -24,25 +24,27 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.security.auth.login.LoginException;
 
 class HttpRequest
 {
+    private static final Logger          LOG                              = MyLoggerFactory.getLogger(HttpRequest.class);
     public enum Method {GET, POST, PUT, DELETE};
     private String            url;
     private String            body;
     private HttpURLConnection conn = null;
     private Method method;
-    
+    private Map<String, String> headers;
 
     public HttpRequest(String url)
     {
-        super();
-        this.method = Method.GET;
-        this.url = url;
+        this(url, Method.GET);
     }
 
     public HttpRequest(String url, Method method)
@@ -50,11 +52,17 @@ class HttpRequest
         super();
         this.method = method;
         this.url = url;
+        this.headers = new HashMap<>();
     }
 
     public HttpResponse send() throws LoginException
     {
         return send(this.body);
+    }
+    
+    public void addHeader(String key, String value)
+    {
+        this.headers.put(key, value);
     }
     
     public HttpResponse send(String body) throws LoginException
@@ -66,11 +74,12 @@ class HttpRequest
         conn = openHttpConnection();
         try
         {
-            wr = new OutputStreamWriter(conn.getOutputStream());
             if (Method.POST == method || Method.PUT == method)
-                wr.write(body);
-            
-            wr.flush();
+            {
+                wr = new OutputStreamWriter(conn.getOutputStream());
+                wr.write(body);            
+                wr.flush();
+            }
             br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
             String line = null;
             while ((line = br.readLine()) != null)
@@ -81,6 +90,7 @@ class HttpRequest
         }
         catch (Exception ex)
         {
+            LOG.log(Level.SEVERE, "Error to submit ["+method+"] HTTP request", ex);
             throw new LoginException("Cannot connect to COUCHDB using url [" + url + "]");
         }
         finally
@@ -127,6 +137,8 @@ class HttpRequest
             httpURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
             httpURLConnection.setRequestProperty("Accept", "application/json");
             httpURLConnection.setRequestMethod(method.name());
+            for (Entry<String, String> entry : headers.entrySet())
+                httpURLConnection.setRequestProperty(entry.getKey(), entry.getValue());
             httpURLConnection.connect();
         }
         catch (IOException e)

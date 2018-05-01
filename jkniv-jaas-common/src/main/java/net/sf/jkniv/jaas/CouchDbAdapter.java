@@ -1,6 +1,9 @@
 package net.sf.jkniv.jaas;
 
 import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -10,54 +13,30 @@ import javax.security.auth.login.LoginException;
 
 public class CouchDbAdapter
 {
-
-    private static final Logger          LOG                              = MyLoggerFactory.getLogger(CouchDbAdapter.class);
-
     
-    //public static final String           PROP_DATASOURCE_JNDI             = "datasource-jndi";
-//    
-//    public static final String           PROP_TABLE_USER                  = "user-table";
-//    public static final String           PROP_TABLE_USER_COLUMN_NAME      = "user-name-column";
-//    
-//    public static final String           PROP_TABLE_GROUP                 = "group-table";
-//    public static final String           PROP_TABLE_GROUP_COLUMN_USERNAME = "group-table-user-name-column";
-//    
-//    public static final String           PROP_TABLE_GROUP_COLUMN_NAME     = "group-name-column";
+    private static final Logger LOG                           = MyLoggerFactory.getLogger(CouchDbAdapter.class);
     
-    public static final String           PROP_CIPHER_PASSWD               = "cipher-algorithm";
+    public static final String  PROP_CIPHER_PASSWD            = "cipher-algorithm";
+    public static final String  PROP_CHARSET                  = "charset";
+    public static final String  PROP_URL                      = "url";
+    public static final String  PROP_USER                     = "user";
+    public static final String  PROP_PASSWD                   = "password";
+    public static final String  PROP_TABLE_USER_COLUMN_PASSWD = "user-password-column";
+    public static final String  PROP_TABLE_USER_COLUMN_SALT   = "salt-column";
+    public static final String  PROP_TABLE_GROUP_COLUMN_NAME  = "group-name-column";
     
-    public static final String           PROP_CHARSET                     = "charset";
-    
-    public static final String           PROP_URL = "url";
-    public static final String           PROP_USER = "user";
-    public static final String           PROP_PASSWD = "password";
-    public static final String           PROP_TABLE_USER_COLUMN_PASSWD    = "user-password-column";
-    public static final String           PROP_TABLE_USER_COLUMN_SALT    = "salt-column";
-    
-//    public static final String           PROP_SQL_GROUP                   = "sql-group";
-//    public static final String           PROP_SQL_PASSWORD                = "sql-password";
-//    public static final String           PROP_SQL_FOR_SUCCEEDED           = "sql-succeeded";
-//    public static final String           PROP_SQL_FOR_FAILED              = "sql-failed";
-//    public static final String           PROP_PLACEHOLDER_FOR_EQUAL       = "placeholder-for-equal";
-//    /** Place holder for = sql, default is # */
-//    private String          placeHolderForEqual ;
-    
-//    private String                       sqlGroup                         = null;
-//    private String                       sqlPasswd                        = null;
-//    private String                       sqlForSucceeded                  = null;
-//    private String                       sqlForFailed                     = null;
-    //private final String                 dsJndi;
-    private Cipher                       cipher;
+    private Cipher              cipher;
     private CouchDbAuthenticate conn;
-    private String url;
-    private String baseUrl;
-    //private String schema;
-    private String user;
-    private String passwd;
-    private String passwdField;
-    private String saltField;
-    private Pattern patternPasswd;
-    private Pattern patternSalt;
+    private String              url;
+    private String              baseUrl;
+    private String              user;
+    private String              passwd;
+    private String              passwdField;
+    private String              saltField;
+    private String              rolesField;
+    private Pattern             patternPasswd;
+    private Pattern             patternSalt;
+    private Pattern             patternRoles;
     
     /**
      * Initialize a realm with some properties.  This can be used
@@ -75,6 +54,7 @@ public class CouchDbAdapter
         this.url = props.getProperty(PROP_URL);
         this.user = props.getProperty(PROP_USER);
         this.passwd = props.getProperty(PROP_PASSWD);
+        this.rolesField= props.getProperty(PROP_TABLE_GROUP_COLUMN_NAME);
         this.baseUrl = extractUrlFromSchema();
         
         this.passwdField = props.getProperty(PROP_TABLE_USER_COLUMN_PASSWD, "password");
@@ -92,24 +72,26 @@ public class CouchDbAdapter
             cipher = CipherFactory.newPlainText(Charset.forName(charset));
         else
             cipher = CipherFactory.newSHA256(Charset.forName(charset));
-
-        this.patternPasswd = Pattern.compile("(?:\""+passwdField+"\":\")(.*?)(?:\")");
-        if(cipher.hasSalt())
+        
+        this.patternPasswd = Pattern.compile("(?:\"" + passwdField + "\":\")(.*?)(?:\")");
+        //"(?:\"roles\":)(?:\\[)(.*)(?:\\])
+        //"(?:\"category\":)(?:\\[)(.*)(?:\"\\])"
+        this.patternRoles = Pattern.compile("(?:\""+ rolesField+ "\":)(?:\\[)(.*)(?:\"\\])");
+        if (cipher.hasSalt())
         {
             this.saltField = props.getProperty(PROP_TABLE_USER_COLUMN_SALT, "salt");
-            this.patternSalt = Pattern.compile("(?:\""+saltField+"\":\")(.*?)(?:\")");
+            this.patternSalt = Pattern.compile("(?:\"" + saltField + "\":\")(.*?)(?:\")");
         }
+        
+        rolesField = props.getProperty(PROP_TABLE_GROUP_COLUMN_NAME);
         
         conn = new CouchDbAuthenticate(baseUrl, user, passwd);
         LOG.info("COUCHDB Adapter Properties");
-        LOG.info("url=" + url +
-                 ", user=" + user +
-                 ", cipher="+cipher.getAlgorithm() + 
-                 ", " + PROP_TABLE_USER_COLUMN_PASSWD + "=" + passwdField + 
-                 ", " + PROP_TABLE_USER_COLUMN_SALT + "=" + saltField+
-                 ", charset="+charset);
+        LOG.info("url=" + url + ", user=" + user
+                + (passwd == null ? ", password=null" : ", password=" + passwd.replaceAll(".", "*")) + ", cipher="
+                + cipher.getAlgorithm() + ", " + PROP_TABLE_USER_COLUMN_PASSWD + "=" + passwdField + ", "
+                + PROP_TABLE_USER_COLUMN_SALT + "=" + saltField + ", charset=" + charset);
     }
-
     
     /**
      * Invoke jdbc authenticator.
@@ -124,13 +106,15 @@ public class CouchDbAdapter
         String cookie = conn.getCookieSession();
         if (conn.isExpired())
             cookie = conn.authenticate();
-            
-        HttpRequest request = new HttpRequest(this.url+"/"+username);
         
+        HttpRequest request = new HttpRequest(this.url + "/" + username);
+        //// Cookie: AuthSession=YWRtaW46NUFCN0Y1Qzc6SQD7rM4vjA42_xp5ngAXYojGCEI
+        request.addHeader("Cookie", cookie);
         HttpResponse httpResponse = request.send();
         String response = httpResponse.getBody();
         
         String couchPasswd = extractJsonData(patternPasswd.matcher(response));
+        
         if (cipher.hasSalt())
         {
             String couchSalt = extractJsonData(patternSalt.matcher(response));
@@ -142,7 +126,51 @@ public class CouchDbAdapter
         }
         return auth;
     }
+    
+    /**
+     * Returns the name of all the groups that this user belongs to.
+     * It loads the result from groupCache first.
+     * This is called from web path group verification, though
+     * it should not be.
+     *
+     * @param username Name of the user in this realm whose group listing
+     *     is needed.
+     * @return Enumeration of group names (strings).
+     * @exception InvalidOperationException thrown if the realm does not
+     *     support this operation - e.g. Certificate realm does not support
+     *     this operation.
+     */
+    public List<String> getGroupNames(String username) //throws InvalidOperationException, NoSuchUserException
+    {
+        HttpResponse httpResponse = null;
+        String response = null;
+        String cookie = conn.getCookieSession();
+        if (conn.isExpired())
+        {
+            try
+            {
+                cookie = conn.authenticate();
+            }
+            catch (LoginException ignore) {}
+        }
+        HttpRequest request = new HttpRequest(this.url + "/" + username);
+        //// Cookie: AuthSession=YWRtaW46NUFCN0Y1Qzc6SQD7rM4vjA42_xp5ngAXYojGCEI
+        request.addHeader("Cookie", cookie);
+        try
+        {
+            httpResponse = request.send();
+        }
+        catch (LoginException ignore) {}
+        response = httpResponse.getBody();
 
+        String[] roles = new String[0];
+        //List<String> groups = findDbGroups(username);
+        Matcher matcher = patternRoles.matcher(response);
+        if (matcher.find())
+            roles = matcher.group(1).replaceAll("\"","").split(",");
+        
+        return Arrays.asList(roles);
+    }
     
     private String extractUrlFromSchema()
     {
@@ -150,12 +178,12 @@ public class CouchDbAdapter
         String baseUrl = url.substring(0, ch);
         return baseUrl;
     }
-
+    
     private String extractJsonData(Matcher matcher)
     {
         String value = "";
         if (matcher.find())
-            value = matcher.group().split(":")[1].replaceAll("\"","");
+            value = matcher.group().split(":")[1].replaceAll("\"", "");
         
         return value;
     }

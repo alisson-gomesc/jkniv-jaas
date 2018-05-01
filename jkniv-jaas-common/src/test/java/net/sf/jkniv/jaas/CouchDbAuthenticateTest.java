@@ -28,7 +28,7 @@ public class CouchDbAuthenticateTest
     public void setUp()
     {
         url = "http://127.0.0.1:5984";
-        schema = "db3t-useraccess";
+        schema = "whinstone-author";
         user = "admin";
         passwd = "admin";
     }
@@ -42,6 +42,20 @@ public class CouchDbAuthenticateTest
         assertThat(cookie, not(is("")));
         assertThat(cookie.startsWith("AuthSession"), is(true));
         System.out.println(cookie);
+    }
+    
+    @Test
+    public void whenGetDocumentoUsinGetMethod() throws LoginException
+    {
+        CouchDbAuthenticate auth = new CouchDbAuthenticate(url, user, passwd);
+        String cookie = auth.authenticate();
+        HttpRequest request = new HttpRequest(url+"/"+schema+"/1");
+        HttpResponse response = request.send();
+       
+        assertThat(response, notNullValue());
+        assertThat(response.getStatus(), is(200));
+        assertThat(response.getBody(), notNullValue());
+        System.out.println(response.getBody());
     }
     
     
@@ -64,7 +78,7 @@ public class CouchDbAuthenticateTest
     }
 
     @Test
-    public void whenParseJsonPassord()
+    public void whenParserJsonPassword()
     {
         //(?:"asin":")(.*?)(?:")
         Pattern pattern = Pattern.compile("(?:\"passwd\":\")(.*?)(?:\")");
@@ -77,4 +91,33 @@ public class CouchDbAuthenticateTest
         String pass= matcher.group().split(":")[1].replaceAll("\"","");
         assertThat(pass, is("DA5AA25B5DBAF93379DC603BD0A27AD27206DAFCA9E71E73"));
     }
+    
+    @Test
+    public void whenParserJsonRoles()
+    {
+        Pattern pattern = Pattern.compile("(?:\"roles\":)(?:\\[)(.*)(?:\\])");        
+        String body = "{\"status\":\"ACTIVE\",\"email\":\"35marcilio@gmail.com\", \"roles\":[\"ADMIN\",\"OPERATOR\"] }";
+        Matcher matcher = pattern.matcher(body);
+        assertThat(matcher.find(), is(true));
+        String[] roles = matcher.group(1).replaceAll("\"","").split(",");
+        
+        assertThat(roles.length, is(2));
+        assertThat(roles[0], is("ADMIN"));
+        assertThat(roles[1], is("OPERATOR"));
+    }
+
+    @Test
+    public void whenExtractJsonArray()
+    {
+        Pattern pattern = Pattern.compile("(?:\"category\":)(?:\\[)(.*)(?:\"\\])");        
+        String body = "{\"device_types\":[\"smartphone\"],\"isps\":[\"a\",\"B\"],\"network_types\":[],\"countries\":[],\"category\":[\"Jebb\",\"Bush\"],\"carriers\":[],\"exclude_carriers\":[]}";
+        Matcher matcher = pattern.matcher(body);
+        assertThat(matcher.find(), is(true));
+        String[] categories = matcher.group(1).replaceAll("\"","").split(",");
+        
+        assertThat(categories.length, is(2));
+        assertThat(categories[0], is("Jebb"));
+        assertThat(categories[1], is("Bush"));
+    }
+    
 }

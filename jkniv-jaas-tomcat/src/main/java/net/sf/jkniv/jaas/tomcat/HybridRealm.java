@@ -60,23 +60,29 @@ public class HybridRealm //extends AppservRealm
     private boolean                    supportsAuthoJdbc;
     private boolean                    supportsAuthCouch;
     private boolean                    supportsAuthoCouch;
-    private Map<String, Vector>        cacheGroup;
-    private Vector<String>             emptyVector;
+    //private Map<String, Vector>        cacheGroup;
+    //private Vector<String>             emptyVector;
     private Properties props;
     
     public HybridRealm(Properties props) //throws BadRealmException, NoSuchRealmException
     {
         LOG.info("Starting " + getClass().getSimpleName() + " realm");
-        this.cacheGroup = new HashMap<String, Vector>();
-        this.emptyVector = new Vector<String>();
+        //this.cacheGroup = new HashMap<String, Vector>();
+        //this.emptyVector = new Vector<String>();
         this.props = props;
         this.jdbcAdapter = new JdbcAdapter(props);
         this.ldapAdapter = new LdapAdapter(props);
         this.couchDbAdapter = new CouchDbAdapter(props);
         if (LOG.isLoggable(Level.FINER))
         {
+            StringBuilder sb = new StringBuilder();
             for (Object k : props.keySet())
-                LOG.finer(k + "=" + props.get(k));
+            {
+                if(sb.length() > 0)
+                    sb.append(", ");
+                sb.append(k + "=" + props.get(k));
+            }
+            LOG.finer(sb.toString());
         }
         // Pass the properties declared in the console to the system
         //String ctxParam = props.getProperty(IASRealm.JAAS_CONTEXT_PARAM);
@@ -101,18 +107,25 @@ public class HybridRealm //extends AppservRealm
         boolean authLdap = false;
         boolean authJdbc = false;
         boolean authCouch = false;
-        //        LOG.log(Level.FINEST,"LEVEL FINEST");
-        //        LOG.log(Level.FINER,"LEVEL FINER");
-        //        LOG.log(Level.FINE,"LEVEL FINE");
-        //        LOG.log(Level.INFO,"LEVEL INFO");
-        //        LOG.log(Level.CONFIG,"LEVEL CONFIG");
-        //        LOG.log(Level.WARNING,"LEVEL WARNING");
-        //        LOG.log(Level.SEVERE,"LEVEL SEVERE");
+        //LOG.log(Level.FINEST,"LEVEL FINEST");
+        //LOG.log(Level.FINER,"LEVEL FINER");
+        //LOG.log(Level.FINE,"LEVEL FINE");
+        //LOG.log(Level.INFO,"LEVEL INFO");
+        //LOG.log(Level.CONFIG,"LEVEL CONFIG");
+        //LOG.log(Level.WARNING,"LEVEL WARNING");
+        //LOG.log(Level.SEVERE,"LEVEL SEVERE");
         
-        LOG.info(I18nManager.getString("hybrid.realm.infoauth", username + ":*****", Boolean.valueOf(supportsAuthJdbc), Boolean.valueOf(supportsAuthLdap),
-                Boolean.valueOf(supportsAuthoJdbc), Boolean.valueOf(supportsAuthoLdap)));
+        LOG.info(
+                I18nManager.getString("hybrid.realm.infoauth", 
+                        username + (password==null? ":null" : ":"+password.replaceAll(".", "*")), 
+                        Boolean.valueOf(supportsAuthJdbc), 
+                        Boolean.valueOf(supportsAuthLdap),
+                        Boolean.valueOf(supportsAuthoJdbc), 
+                        Boolean.valueOf(supportsAuthoLdap),
+                        Boolean.valueOf(supportsAuthCouch), 
+                        Boolean.valueOf(supportsAuthoCouch)));
         
-        if (!supportsAuthJdbc && !supportsAuthLdap)
+        if (!supportsAuthJdbc && !supportsAuthLdap && !supportsAuthCouch)
             throw new LoginException(I18nManager.getString("hybrid.realm.withoutauth"));
         
         if (supportsAuthLdap)
@@ -134,16 +147,20 @@ public class HybridRealm //extends AppservRealm
         
         groups = new String[grpList.size()];
         int i = 0;
+        StringBuilder sbGroups = new StringBuilder("roles: ");
         for (String g : grpList)
         {
-            LOG.info("group -> " + g);
+            if (sbGroups.length() > 7)
+                sbGroups.append(", ");
+            sbGroups.append(g);
             groups[i++] = g;
         }
-        
+        LOG.info(sbGroups.toString());
         jdbcAdapter.logForSucceeded(username);
         return groups;
     }
     
+    /*
     //@Override
     public Enumeration getGroupNames(String username) //throws InvalidOperationException, NoSuchUserException
     {
@@ -160,21 +177,26 @@ public class HybridRealm //extends AppservRealm
         }
         return vector.elements();
     }
-    
+    */
     private List<String> getGroupsFromAdapters(String username)
     {
         List<String> groupsLdap = Collections.emptyList();
         List<String> groupsJdbc = Collections.emptyList();
+        List<String> groupsCouchDb = Collections.emptyList();
+        
         if (supportsAuthoLdap)
             groupsLdap = ldapAdapter.getGroupNames(username);
         
         if (supportsAuthoJdbc)
             groupsJdbc = jdbcAdapter.getGroupNames(username);
-        
+
+        if (supportsAuthoCouch)
+            groupsCouchDb = couchDbAdapter.getGroupNames(username);
+
         List<String> allGroups = new ArrayList<String>(groupsJdbc.size() + groupsLdap.size());
         allGroups.addAll(groupsLdap);
         allGroups.addAll(groupsJdbc);
-        
+        allGroups.addAll(groupsCouchDb);
         String assignGroups = this.props.getProperty(PROP_ASSIGN_GROUPS);
         if (assignGroups != null)
         {
@@ -185,82 +207,7 @@ public class HybridRealm //extends AppservRealm
         return allGroups;
     }
     
-    private Enumeration<String> getGroupsLdap(String username, String password) throws LoginException
-    {
-        Enumeration<String> groupsLdap = new Hashtable<String, String>().elements();
-        //FIXME get groups from LDAP
-        return groupsLdap;
-    }
-    
     /*
-     * Check if this real it's configured to supports JDBC authentication
-     * @return {@code true} when supports, {@code false} otherwise
-     *
-    private boolean supportsAuthJdbc()
-    {
-        return Boolean.valueOf(getProperty(PROP_AUTH_TYPE_JDBC));
-    }
-    
-    /*
-     * Check if this real it's configured to supports LDAP authentication
-     * @return {@code true} when supports, {@code false} otherwise
-     *
-    private boolean supportsAuthLdap()
-    {
-        return Boolean.valueOf(getProperties().getProperty(PROP_AUTH_TYPE_LDAP, "true"));
-    }
-    
-    /*
-     * Check if this real it's configured to supports JDBC authorization
-     * @return {@code true} when supports, {@code false} otherwise
-     *
-    private boolean supportsAuthoJdbc()
-    {
-        return Boolean.valueOf(getProperties().getProperty(PROP_AUTHO_TYPE_JDBC,"true"));
-    }
-    
-    /*
-     * Check if this real it's configured to supports LDAP authorization
-     * @return {@code true} when supports, {@code false} otherwise
-     *
-    private boolean supportsAuthoLdap()
-    {
-        return Boolean.valueOf(getProperty(PROP_AUTHO_TYPE_LDAP));
-    }
-    */
-    
-//    /**
-//     * Returns a short (preferably less than fifteen characters) description
-//     * of the kind of authentication which is supported by this realm.
-//     *
-//     * @return Description of the kind of authentication that is directly
-//     *     supported by this realm.
-//     */
-//    @Override
-//    public String getAuthType()
-//    {
-//        return PROP_AUTH_TYPE;
-//    }
-//    
-//    @Override
-//    public String getJAASContext()
-//    {
-//        return "hybridRealm";
-//    }
-    
-//    private String setPropertyValue(final String key, final String defaultValue, Properties props)
-//    {
-//        String value = props.getProperty(key, defaultValue);
-//        setProperty(key, value);
-//        return value;
-//    }
-//    
-//    private String getProperty(String name, String defaultValue)
-//    {
-//        String value = super.getProperty(name);
-//        return (value == null ? defaultValue : value);
-//    }
-    
     private void cachingGroupNames(String username, List<String> groups)
     {
         Vector<String> v = null;
@@ -284,5 +231,6 @@ public class HybridRealm //extends AppservRealm
             this.cacheGroup.put(username, v);
         }
     }
+    */
     
 }

@@ -44,7 +44,7 @@ import net.sf.jkniv.jaas.I18nManager;
 public class HybridLoginModule implements LoginModule
 {
     private static final Logger    LOG                  = MyLoggerFactory.getLogger(HybridLoginModule.class);
-    private HybridRealm _currentRealm;
+    private HybridRealm currentRealm;
     //private UserInfo userInfo;
     private Subject subject;
     private CallbackHandler callbackHandler;
@@ -77,7 +77,7 @@ public class HybridLoginModule implements LoginModule
         this.options = options;
         Properties propsRealm = new Properties();
         propsRealm.putAll(options);
-        this._currentRealm = new HybridRealm(propsRealm);
+        this.currentRealm = new HybridRealm(propsRealm);
     }
 
     /**
@@ -106,7 +106,7 @@ public class HybridLoginModule implements LoginModule
                 throw new FailedLoginException();
             }
 
-            this.grpList = _currentRealm.authenticate(webUserName, webCredential);
+            this.grpList = currentRealm.authenticate(webUserName, webCredential);
             this.currentUser = new UserPrincipal(webUserName, webCredential);
             
             //userInfo = new UserInfo(webUserName, Credential.getCredential(webCredential.toString()), Arrays.asList(grpList));
@@ -140,6 +140,7 @@ public class HybridLoginModule implements LoginModule
      * @return true if committed, false if not (likely not authenticated)
      * @throws LoginException if unable to commit
      */
+    @Override
     public boolean commit() throws LoginException
     {
         if (!isAuthenticated())
@@ -165,6 +166,7 @@ public class HybridLoginModule implements LoginModule
      * @return true always
      * @throws LoginException if unable to logout
      */
+    @Override
     public boolean logout() throws LoginException
     {
         this.unsetJAASInfo();
@@ -177,6 +179,7 @@ public class HybridLoginModule implements LoginModule
      * @see javax.security.auth.spi.LoginModule#abort()
      * @throws LoginException if unable to abort
      */
+    @Override
     public boolean abort() throws LoginException
     {
         this.currentUser = null;

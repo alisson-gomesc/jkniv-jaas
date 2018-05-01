@@ -64,7 +64,7 @@ The hybrid realm are: LDAP and Database. You can use LDAP to authentication and 
 | group-table          |                | table name from user groups |
 | group-name-column    |                | column name from group in the group table |
 | group-table-user-name-column |        | column name from user in the group table |
-| cipher-algorithm     | `SHA256`      | algorithm for encode password at database |
+| cipher-algorithm     | `SHA-256`      | algorithm for encode password at database values: `SHA-256`, `MD5`, `HMACSHA1` or `PLAIN_TEXT`|
 | charset              | `UTF-8`       | charset encode for password |
 | sql-group            |                | alternative SQL to retrieve the groups from user. Sample: `SELECT GROUP_ID FROM AUTH_GROUP WHERE USERNAME = ? `. The group name must be the first column. |
 | sql-password         |                | alternative SQL to retrieve the password from user. Sample: `SELECT PASSWD FROM AUTH_USER WHERE USERNAME = ? `. The password must be the first column.|
