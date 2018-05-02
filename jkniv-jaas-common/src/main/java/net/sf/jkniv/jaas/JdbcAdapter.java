@@ -33,15 +33,6 @@ import java.util.logging.Logger;
 import javax.security.auth.login.LoginException;
 import javax.sql.DataSource;
 
-//import com.sun.enterprise.security.auth.digest.api.Password;
-//import com.sun.enterprise.security.auth.realm.BadRealmException;
-//import com.sun.enterprise.security.auth.realm.InvalidOperationException;
-//import com.sun.enterprise.security.auth.realm.NoSuchRealmException;
-//import com.sun.enterprise.security.auth.realm.NoSuchUserException;
-//import com.sun.enterprise.util.i18n.StringManager;
-//import com.sun.logging.LogDomains;
-
-
 public class JdbcAdapter
 {
     private static final Logger          LOG                              = MyLoggerFactory.getLogger(JdbcAdapter.class);
@@ -87,8 +78,6 @@ public class JdbcAdapter
      * @param props Initialization parameters used by this realm.
      * @exception BadRealmException If the configuration parameters
      *     identify a corrupt realm.
-     * @exception NoSuchRealmException If the configuration parameters
-     *     specify a realm which doesn't exist.
      */
     public JdbcAdapter(Properties props) throws BadRealmException//, NoSuchRealmException
     {
@@ -163,9 +152,6 @@ public class JdbcAdapter
      * @param username Name of the user in this realm whose group listing
      *     is needed.
      * @return Enumeration of group names (strings).
-     * @exception InvalidOperationException thrown if the realm does not
-     *     support this operation - e.g. Certificate realm does not support
-     *     this operation.
      */
     public List<String> getGroupNames(String username) //throws InvalidOperationException, NoSuchUserException
     {
@@ -231,7 +217,8 @@ public class JdbcAdapter
      *
      * @param username User name to authenticate.
      * @param password password for authenticate.
-     * @returns {{@code true} when the authentication is successfully, {@code false} otherwise.
+     * @return {{@code true} when the authentication is successfully, {@code false} otherwise.
+     * @throws LoginException when cannot authenticate the {@code username} with {@code plainPassword}
      */
     public boolean authenticate(String username, String password) throws LoginException
     {

@@ -1,6 +1,5 @@
 /* 
- * JKNIV, whinstone one contract to access your database.
- * 
+ * JKNIV JAAS,
  * Copyright (C) 2017, the original author or authors.
  *
  * This library is free software; you can redistribute it and/or
