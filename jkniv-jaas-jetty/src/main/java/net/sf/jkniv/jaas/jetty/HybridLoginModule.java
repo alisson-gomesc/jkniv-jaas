@@ -20,6 +20,7 @@
 package net.sf.jkniv.jaas.jetty;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Properties;
@@ -111,7 +112,13 @@ public class HybridLoginModule extends AbstractLoginModule
             JAASUserInfo currentUser = new JAASUserInfo(userInfo);
             setCurrentUser(currentUser);
             setAuthenticated(true);
+            currentUser.setJAASInfo(getSubject());
             currentUser.fetchRoles();
+//            Method method = currentUser.getClass().getMethod("fetchRoles");
+//            if (method != null)
+//            {
+//                method.invoke(currentUser);
+//            }
             LOG.info(I18nManager.getString("hybrid.realm.login.successfully", webUserName));
         }
         catch (IOException e)

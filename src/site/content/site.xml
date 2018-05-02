@@ -34,11 +34,12 @@
     </breadcrumbs>
     <menu name="Hybrid Realm" inherit="top">
       <item name="Getting Start" href="index.html" />
-      <item name="Jetty" href="jetty-realm.html" />
-      <item name="Tomcat" href="tomcat-realm.html" />
-      <item name="Glassfish" href="glassfish-realm.html" />
+      <item name="Config Realm" href="config-realm.html" />
+      <item name="Config Jetty" href="jetty-realm.html" />
+      <item name="Config Tomcat" href="tomcat-realm.html" />
+      <item name="Config Glassfish" href="glassfish-realm.html" />
       <item name="Javadoc" href="api-docs/index.html" />
-      <item name="Donwload" href="https://sourceforge.net/projects/jkniv/files/jkniv-jaas-glassfish" />
+      <item name="Donwload" href="https://sourceforge.net/projects/jkniv/files/jkniv-jaas" />
     </menu>
     <menu ref="reports" />
   </body>

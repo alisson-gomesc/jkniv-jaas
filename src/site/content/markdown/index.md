@@ -7,7 +7,7 @@ JAAS Hybrid Realm
 [Java Authentication and Authorization Service (JAAS)][1] provide mechanism to authentication and authorization the users making your application independent from authentication technologies.
 
 
-Hybrid Realm provides an interchangeable authentication and authorization combination for your application, where could combine Database Realm x LDAP Real x CouchDB Realm:
+Hybrid Realm provides an interchangeable and combined for authentication and authorization your application, where could be combined Database Realm x LDAP Real x CouchDB Realm:
 
 
 | Realm   | Authentication | Authorization |
@@ -15,6 +15,12 @@ Hybrid Realm provides an interchangeable authentication and authorization combin
 |LDAP     |    supports    |   supports    | 
 |RDBMS    |    supports    |   supports    |
 |CouchDB  |    supports    |   supports    | 
+
+### Requirements
+
+`jkniv-jaas-glassfish` and `jkniv-jaas-tomcat` require JDK 1.6 or high.
+
+`jkniv-jaas-jetty` require JDK 1.7 or high.
 
 
 Maven users will need to add one from following dependency:
@@ -74,13 +80,13 @@ If your application needs use the Cypher algorithm to encrypt the passwords you 
 There is a `jar` module for each server: Glassfish, Jetty and Tomcat.
 
 
-| Server                            | Version    |
-|-----------------------------------|------------|
-|Tomcat `jkniv-jaas-tomcat`       | 7, 8 and 9 |
-|Jetty  `jkniv-jaas-jetty`        | 8, 9       | 
-|Glassfish `jkniv-jaas-glassfish` | 4.1        |    
+| Server                            | Version tested   |
+|-----------------------------------|------------------|
+| `jkniv-jaas-tomcat` Tomcat      | 7, 8 and 9       |
+| `jkniv-jaas-jetty` Jetty        | 9                | 
+| `jkniv-jaas-glassfish` Glassfish| 4.1              |    
 
-**Note:** The Tomcat module it’s independently from application server, if you application server doesn’t require a inherits from a inner class this module must be works for you.
+**Note:** The Tomcat module it’s independently from application server, if you application server no require a inherits from a inner class this module must works for you.
 
 
 [1]: https://docs.oracle.com/javase/8/docs/technotes/guides/security/jaas/JAASRefGuide.html "Java Authentication and Authorization Service (JAAS)"

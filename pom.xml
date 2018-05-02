@@ -109,7 +109,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
-            <version>2.10.4</version>
+            <version>3.0.0</version>
             <configuration>
               <show>public</show>
               <nohelp>true</nohelp>
@@ -191,15 +191,16 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.10.4</version>
+        <version>3.0.0</version>
         <configuration>
           <links>
-            <link>http://java.sun.com/j2se/1.5.0/docs/api</link>
+            <link>https://docs.oracle.com/javase/6/docs/api/</link>
           </links>
           <detectLinks>false</detectLinks>
           <detectJavaApiLink>false</detectJavaApiLink>
           <destDir>api-docs</destDir>
           <linksource>true</linksource>
+          <show>public</show>
         </configuration>
       </plugin>
     </plugins>

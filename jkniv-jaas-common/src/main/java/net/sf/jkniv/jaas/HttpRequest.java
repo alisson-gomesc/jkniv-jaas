@@ -52,7 +52,7 @@ class HttpRequest
         super();
         this.method = method;
         this.url = url;
-        this.headers = new HashMap<>();
+        this.headers = new HashMap<String,String>();
     }
 
     public HttpResponse send() throws LoginException
