@@ -41,6 +41,7 @@ import com.sun.enterprise.security.auth.realm.NoSuchRealmException;
 import com.sun.enterprise.security.auth.realm.NoSuchUserException;
 import com.sun.enterprise.util.i18n.StringManager;
 
+import net.sf.jkniv.jaas.CouchDbAdapter;
 import net.sf.jkniv.jaas.I18nManager;
 import net.sf.jkniv.jaas.JdbcAdapter;
 import net.sf.jkniv.jaas.LdapAdapter;
@@ -62,6 +63,7 @@ public class HybridRealm extends AppservRealm
     private static final StringManager i18n                 = StringManager.getManager(JdbcAdapter.class);
     private JdbcAdapter                jdbcAdapter;
     private LdapAdapter                ldapAdapter;
+    private CouchDbAdapter             couchDbAdapter;
     private boolean                    supportsAuthLdap;
     private boolean                    supportsAuthoLdap;
     private boolean                    supportsAuthoCouch;
@@ -81,6 +83,8 @@ public class HybridRealm extends AppservRealm
         
         this.jdbcAdapter = new JdbcAdapter(props);
         this.ldapAdapter = new LdapAdapter(props);
+        this.couchDbAdapter = new CouchDbAdapter(props);
+        
         if (LOG.isLoggable(Level.CONFIG))
         {
             LOG.config("Init clsiv Realm");
@@ -108,6 +112,7 @@ public class HybridRealm extends AppservRealm
         String password = String.valueOf(_password);
         boolean authLdap = false;
         boolean authJdbc = false;
+        boolean authCouch = false;
         
         //        LOG.log(Level.FINEST,"LEVEL FINEST");
         //        LOG.log(Level.FINER,"LEVEL FINER");
@@ -120,23 +125,29 @@ public class HybridRealm extends AppservRealm
         LOG.finest(
                 I18nManager.getString("hybrid.realm.infoauth", 
                         username + (password==null? ":null" : ":"+password.replaceAll(".", "*")), 
-                        Boolean.valueOf(supportsAuthJdbc), 
                         Boolean.valueOf(supportsAuthLdap),
-                        Boolean.valueOf(supportsAuthoJdbc), 
-                        Boolean.valueOf(supportsAuthoLdap),
+                        Boolean.valueOf(supportsAuthJdbc), 
                         Boolean.valueOf(supportsAuthCouch), 
+                        Boolean.valueOf(supportsAuthoLdap),
+                        Boolean.valueOf(supportsAuthoJdbc), 
                         Boolean.valueOf(supportsAuthoCouch)));
         
-        if (!supportsAuthJdbc && !supportsAuthLdap)
-            throw new LoginException(sm.getString("hybrid.realm.withoutauth"));
+        if (!supportsAuthJdbc && !supportsAuthLdap && !supportsAuthCouch)
+            throw new LoginException(I18nManager.getString("hybrid.realm.withoutauth"));
+        
+        //if (!supportsAuthJdbc && !supportsAuthLdap)
+        //    throw new LoginException(sm.getString("hybrid.realm.withoutauth"));
         
         if (supportsAuthLdap)
             authLdap = ldapAdapter.authenticate(username, password, supportsAuthoLdap);
         
-        if (supportsAuthJdbc && !authLdap)
+        if (supportsAuthJdbc)// && !authLdap)
             authJdbc = jdbcAdapter.authenticate(username, password);
         
-        if (!authLdap && !authJdbc)
+        if (supportsAuthCouch)// && !authLdap && !authJdbc)
+            authCouch = couchDbAdapter.authenticate(username, password);
+
+        if (!authLdap && !authJdbc && !authCouch)
         {
             jdbcAdapter.logForFailed(username);
             throw new LoginException(sm.getString("hybrid.realm.loginfail", username));
@@ -177,15 +188,21 @@ public class HybridRealm extends AppservRealm
     {
         List<String> groupsLdap = Collections.emptyList();
         List<String> groupsJdbc = Collections.emptyList();
+        List<String> groupsCouchDb = Collections.emptyList();
+        
         if (supportsAuthoLdap)
             groupsLdap = ldapAdapter.getGroupNames(username);
         
         if (supportsAuthoJdbc)
             groupsJdbc = jdbcAdapter.getGroupNames(username);
         
+        if (supportsAuthoCouch)
+            groupsCouchDb = couchDbAdapter.getGroupNames(username);
+        
         List<String> allGroups = new ArrayList<String>(groupsJdbc.size() + groupsLdap.size());
         allGroups.addAll(groupsLdap);
         allGroups.addAll(groupsJdbc);
+        allGroups.addAll(groupsCouchDb);
         
         String assignGroups = getProperty(PROP_ASSIGN_GROUPS);
         if (assignGroups != null)
@@ -203,43 +220,6 @@ public class HybridRealm extends AppservRealm
         Enumeration<String> groupsLdap = new Hashtable<String, String>().elements();
         return groupsLdap;
     }
-    
-    /*
-     * Check if this real it's configured to supports JDBC authentication
-     * @return {@code true} when supports, {@code false} otherwise
-     *
-    private boolean supportsAuthJdbc()
-    {
-        return Boolean.valueOf(getProperty(PROP_AUTH_TYPE_JDBC));
-    }
-    
-    /*
-     * Check if this real it's configured to supports LDAP authentication
-     * @return {@code true} when supports, {@code false} otherwise
-     *
-    private boolean supportsAuthLdap()
-    {
-        return Boolean.valueOf(getProperties().getProperty(PROP_AUTH_TYPE_LDAP, "true"));
-    }
-    
-    /*
-     * Check if this real it's configured to supports JDBC authorization
-     * @return {@code true} when supports, {@code false} otherwise
-     *
-    private boolean supportsAuthoJdbc()
-    {
-        return Boolean.valueOf(getProperties().getProperty(PROP_AUTHO_TYPE_JDBC,"true"));
-    }
-    
-    /*
-     * Check if this real it's configured to supports LDAP authorization
-     * @return {@code true} when supports, {@code false} otherwise
-     *
-    private boolean supportsAuthoLdap()
-    {
-        return Boolean.valueOf(getProperty(PROP_AUTHO_TYPE_LDAP));
-    }
-    */
     
     /**
      * Returns a short (preferably less than fifteen characters) description

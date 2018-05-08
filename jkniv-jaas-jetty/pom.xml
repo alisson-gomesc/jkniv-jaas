@@ -6,7 +6,7 @@
   <parent>
     <groupId>net.sf.jkniv</groupId>
     <artifactId>jkniv-jaas</artifactId>
-    <version>0.3.0</version>
+    <version>0.3.1</version>
   </parent>
 
   <artifactId>jkniv-jaas-jetty</artifactId>
@@ -26,7 +26,7 @@
     <dependency>
       <groupId>net.sf.jkniv</groupId>
       <artifactId>jkniv-jaas-common</artifactId>
-      <version>0.3.0</version>
+      <version>0.3.1</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jetty</groupId>

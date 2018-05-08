@@ -118,11 +118,11 @@ public class HybridRealm //extends AppservRealm
         LOG.info(
                 I18nManager.getString("hybrid.realm.infoauth", 
                         username + (password==null? ":null" : ":"+password.replaceAll(".", "*")), 
-                        Boolean.valueOf(supportsAuthJdbc), 
                         Boolean.valueOf(supportsAuthLdap),
-                        Boolean.valueOf(supportsAuthoJdbc), 
-                        Boolean.valueOf(supportsAuthoLdap),
+                        Boolean.valueOf(supportsAuthJdbc), 
                         Boolean.valueOf(supportsAuthCouch), 
+                        Boolean.valueOf(supportsAuthoLdap),
+                        Boolean.valueOf(supportsAuthoJdbc), 
                         Boolean.valueOf(supportsAuthoCouch)));
         
         if (!supportsAuthJdbc && !supportsAuthLdap && !supportsAuthCouch)
@@ -131,10 +131,10 @@ public class HybridRealm //extends AppservRealm
         if (supportsAuthLdap)
             authLdap = ldapAdapter.authenticate(username, password, supportsAuthoLdap);
         
-        if (supportsAuthJdbc && !authLdap)
+        if (supportsAuthJdbc)// && !authLdap)
             authJdbc = jdbcAdapter.authenticate(username, password);
 
-        if (supportsAuthCouch && !authLdap && !authJdbc)
+        if (supportsAuthCouch)// && !authLdap && !authJdbc)
             authCouch = couchDbAdapter.authenticate(username, password);
 
         if (!authLdap && !authJdbc && !authCouch)
@@ -160,24 +160,6 @@ public class HybridRealm //extends AppservRealm
         return groups;
     }
     
-    /*
-    //@Override
-    public Enumeration getGroupNames(String username) //throws InvalidOperationException, NoSuchUserException
-    {
-        Vector<String> vector = this.cacheGroup.get(username);
-        if (vector == null)
-        {
-            List<String> allGroups = getGroupsFromAdapters(username);
-            vector = new Vector<String>(allGroups.size());
-            for (String g : allGroups)
-                vector.addElement(g);
-            
-            cachingGroupNames(username, allGroups);
-            vector = this.cacheGroup.get(username);
-        }
-        return vector.elements();
-    }
-    */
     private List<String> getGroupsFromAdapters(String username)
     {
         List<String> groupsLdap = Collections.emptyList();
@@ -205,32 +187,5 @@ public class HybridRealm //extends AppservRealm
                 allGroups.add(g);
         }
         return allGroups;
-    }
-    
-    /*
-    private void cachingGroupNames(String username, List<String> groups)
-    {
-        Vector<String> v = null;
-        
-        if (groups == null)
-        {
-            v = emptyVector;
-            
-        }
-        else
-        {
-            v = new Vector<String>(groups.size());
-            for (String g : groups)
-            {
-                v.add(g);
-            }
-        }
-        
-        synchronized (this)
-        {
-            this.cacheGroup.put(username, v);
-        }
-    }
-    */
-    
+    }    
 }

@@ -30,7 +30,7 @@ for Glassfish server:
     <dependency>
       <groupId>net.sf.jkniv</groupId>
       <artifactId>jkniv-jaas-glassfish</artifactId>
-      <version>0.3.0</version>
+      <version>0.3.1</version>
     </dependency>
 
 for Jetty server:
@@ -38,7 +38,7 @@ for Jetty server:
     <dependency>
       <groupId>net.sf.jkniv</groupId>
       <artifactId>jkniv-jetty-glassfish</artifactId>
-      <version>0.3.0</version>
+      <version>0.3.1</version>
     </dependency>
 
 
@@ -47,7 +47,7 @@ for Tomcat server:
     <dependency>
       <groupId>net.sf.jkniv</groupId>
       <artifactId>jkniv-jaas-glassfish</artifactId>
-      <version>0.3.0</version>
+      <version>0.3.1</version>
     </dependency>
 
 

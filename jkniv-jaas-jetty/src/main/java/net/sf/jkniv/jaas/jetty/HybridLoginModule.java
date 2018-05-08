@@ -112,7 +112,7 @@ public class HybridLoginModule extends AbstractLoginModule
             JAASUserInfo currentUser = new JAASUserInfo(userInfo);
             setCurrentUser(currentUser);
             setAuthenticated(true);
-            currentUser.setJAASInfo(getSubject());
+            //currentUser.setJAASInfo(getSubject());
             currentUser.fetchRoles();
 //            Method method = currentUser.getClass().getMethod("fetchRoles");
 //            if (method != null)

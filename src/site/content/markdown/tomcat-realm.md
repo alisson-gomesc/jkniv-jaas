@@ -10,7 +10,7 @@ Maven users will need to add the following dependency to their pom.xml for this 
     <dependency>
       <groupId>net.sf.jkniv</groupId>
       <artifactId>jkniv-jaas-tomcat</artifactId>
-      <version>0.3.0</version>
+      <version>0.3.1</version>
     </dependency>
 
      
@@ -18,7 +18,7 @@ Maven users will need to add the following dependency to their pom.xml for this 
 
 Copy the jar files `jkniv-jaas-tomcat.jar` to common lib `tomcat-install/lib` from Tomcat:
  
-Create new file `tomcat-install/etc/login.conf` to config the `hybridRealm`. The name `hybridRealm` must be the same value from *appName* attribute `<Realm appName="hybridRealm"` in `server.xml`.
+Create new file `tomcat-install/conf/login.conf` to config the `hybridRealm`. The name `hybridRealm` must be the same value from *appName* attribute `<Realm appName="hybridRealm"` in `server.xml`.
 
 
     hybridRealm {
@@ -73,6 +73,7 @@ Create new file `tomcat-install/etc/login.conf` to config the `hybridRealm`. The
         </auth-constraint>
       </security-constraint>
 
+- Set up Tomcat to to find `tomcat-install/conf/login.conf` file specifying its location to the JVM, for instance by setting the environment variable: JAVA_OPTS=$JAVA_OPTS -Djava.security.auth.login.config==$CATALINA_BASE/conf/login.conf
     
 - start Tomcat (Go forest, go)
 

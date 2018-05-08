@@ -73,10 +73,18 @@ public class I18nManagerTest
     @Test
     public void whenI18nFormatTextSuccessfully5ParamsTyped()
     {
+        //hybrid.realm.infoauth=try to authenticate user {1}, supportsAuthLdap={2}, supportsAuthJdbc={3}, supportsAuthCouchDb={4}, supportsAuthoLdap={5}, supportsAuthoJdbc={6}, supportsAuthoCouchDb={7}
         //hybrid.realm.infoauth=try to authenticate user {1}, supportsAuthJdbc={2}, supportsAuthLdap={3}, supportsAuthoJdbc={4}, supportsAuthoLdap={5}
-        String s = I18nManager.getString("hybrid.realm.infoauth", "mary:*****", Boolean.valueOf(true), Boolean.valueOf(false),
-                        Boolean.valueOf(false), Boolean.valueOf(true), Boolean.valueOf(false), Boolean.valueOf(false));
-        assertThat(s, is("try to authenticate user mary:*****, supportsAuthJdbc=true, supportsAuthLdap=false, supportsAuthoJdbc=false, supportsAuthoLdap=true, supportsAuthCouchDb=false, supportsAuthoLdap=false"));
+        String s = I18nManager.getString("hybrid.realm.infoauth", 
+                "mary:*****", 
+                Boolean.valueOf(true), 
+                Boolean.valueOf(false),
+                Boolean.valueOf(false), 
+                Boolean.valueOf(true), 
+                Boolean.valueOf(false), 
+                Boolean.valueOf(false));
+        //                try to authenticate user {1}       , supportsAuthLdap={2} , supportsAuthJdbc={3}, supportsAuthCouchDb={4}, supportsAuthoLdap={5}, supportsAuthoJdbc={6}, supportsAuthoCouchDb={7}
+        assertThat(s, is("try to authenticate user mary:*****, supportsAuthLdap=true, supportsAuthJdbc=false, supportsAuthCouchDb=false, supportsAuthoLdap=true, supportsAuthoJdbc=false, supportsAuthoCouchDb=false"));
     }
     
     @Test

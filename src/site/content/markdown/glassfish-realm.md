@@ -10,7 +10,7 @@ Maven users will need to add the following dependency to their pom.xml for this 
     <dependency>
       <groupId>net.sf.jkniv</groupId>
       <artifactId>jkniv-jaas-glassfish</artifactId>
-      <version>0.2.0</version>
+      <version>0.3.1</version>
     </dependency>
       
     
