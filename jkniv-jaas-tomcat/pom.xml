@@ -12,7 +12,7 @@
   <name>jkniv-jaas-tomcat</name>
   <packaging>jar</packaging>
   <url>http://jkniv.sf.net</url>
-  <description>JAAS Hybrid realm module (LDAP and JDBC) for tomcat</description>
+  <description>JAAS Hybrid realm module (LDAP, JDBC, CouchDB) for tomcat</description>
 
   <properties>
     <maven.compiler.source>1.6</maven.compiler.source>

@@ -8,7 +8,7 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jkniv-jaas-glassfish</artifactId>
   <name>jkniv-jaas-glassfish</name>
-  <description>JAAS Hybrid realm module (LDAP and JDBC) for Glassfish</description>
+  <description>JAAS Hybrid realm module (LDAP, JDBC, CouchDB) for Glassfish</description>
   <url>http://jkniv.sf.net</url>
   <build>
     <plugins>

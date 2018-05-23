@@ -12,7 +12,7 @@
   <name>jkniv-jaas-glassfish</name>
   <packaging>jar</packaging>
   <url>http://jkniv.sf.net</url>
-  <description>JAAS Hybrid realm module (LDAP and JDBC) for Glassfish</description>
+  <description>JAAS Hybrid realm module (LDAP, JDBC, CouchDB) for Glassfish</description>
 
   <dependencies>
     <!-- 'org.glassfish.security' has a dependency to 'javax.persistence'. However, it is currently 

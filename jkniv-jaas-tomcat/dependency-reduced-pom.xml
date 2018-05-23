@@ -8,7 +8,7 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jkniv-jaas-tomcat</artifactId>
   <name>jkniv-jaas-tomcat</name>
-  <description>JAAS Hybrid realm module (LDAP and JDBC) for tomcat</description>
+  <description>JAAS Hybrid realm module (LDAP, JDBC, CouchDB) for tomcat</description>
   <url>http://jkniv.sf.net</url>
   <build>
     <plugins>

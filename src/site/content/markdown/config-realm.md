@@ -87,7 +87,7 @@ The password `8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918` 
 
 | Property             | Default        | Description   |
 |----------------------|----------------|---------------|
-| url                  |                | CouchDb URL like: http://127.0.0.1:5984/mydatabase |
+| url                  |                | CouchDb URL like: `http://127.0.0.1:5984/mydatabase` |
 | user                 |                | Username to connect in couchdb database |
 | password             |                | Password to connect in couchdb database |
 | user-password-column |                | column name from the user password |
@@ -120,7 +120,7 @@ The password `8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918` 
         user-password-column =PASSWD
         group-table =AUTH_GROUP
         group-name-column =GROUP_ID
-        group-table-user-name-column=USERNAME
+        group-table-user-name-column=USERNAME;
     };
 
 
@@ -132,9 +132,11 @@ The password `8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918` 
         autho-jdbc=false
         authe-couchdb=true
         autho-couchdb=true
-        url="http://127.0.0.1:5984/myusers"
         user-password-column=passwd
         group-name-column=roles
+        url="http://127.0.0.1:5984/myusers"
+        user=admin
+        password="5ecret";
     };
 
 

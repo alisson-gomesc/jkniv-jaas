@@ -8,7 +8,7 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jkniv-jaas-jetty</artifactId>
   <name>jkniv-jaas-jetty</name>
-  <description>JAAS Hybrid realm module (LDAP and JDBC) for Jetty</description>
+  <description>JAAS Hybrid realm module (LDAP, JDBC, CouchDB) for Jetty</description>
   <url>http://jkniv.sf.net</url>
   <build>
     <plugins>

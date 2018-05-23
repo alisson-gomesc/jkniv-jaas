@@ -7,7 +7,7 @@
   <version>0.3.1</version>
   <packaging>pom</packaging>
   <url>http://jkniv.sf.net</url>
-  <description>JAAS Hybrid realm module (LDAP and JDBC) for server applications</description>
+  <description>JAAS Hybrid realm module (LDAP, JDBC, CouchDB) for server applications like Glassfish, Jetty and Tomcat</description>
  
   <properties>
     <maven.compiler.source>1.6</maven.compiler.source>
@@ -84,8 +84,12 @@
   <profiles>
     <profile>
       <id>release-ossrh</id>
+      <!--  mvn clean compile package -Drelease=true  -->
       <activation>
-        <activeByDefault>true</activeByDefault>
+        <property>
+          <name>release</name>
+          <value>true</value>
+        </property>
       </activation>
       <build>
         <plugins>
@@ -185,6 +189,71 @@
         </plugins>
       </build>
     </profile>
+    <profile>
+      <id>rw-milestone</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <version>2.2.1</version>
+            <executions>
+              <execution>
+                <id>attach-sources</id>
+                <goals>
+                  <goal>jar-no-fork</goal>
+                </goals>
+                <configuration>
+                  <failOnError>false</failOnError>
+                  <!--additionalparam>-Xdoclint:none</additionalparam-->
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>2.9.1</version>
+            <executions>
+              <execution>
+                <id>attach-javadocs</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>          
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>          
+        </plugins>
+      </build>
+      <distributionManagement>
+        <repository>
+          <id>rw-artifactory</id>
+          <name>rw-artifactory-releases</name>
+          <url>http://srwint001.rwit.com.br:8080/artifactory/ext-release-local</url>
+        </repository>
+        <snapshotRepository>
+          <id>rw-artifactory</id>
+          <name>rw-artifactory-snapshots</name>
+          <url>http://srwint001.rwit.com.br:8080/artifactory/ext-snapshot-local</url>
+        </snapshotRepository>
+      </distributionManagement>
+    </profile>    
   </profiles>
   <reporting>
     <plugins>

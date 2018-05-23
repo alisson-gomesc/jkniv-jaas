@@ -13,7 +13,7 @@
   <name>jkniv-jaas-jetty</name>
   <packaging>jar</packaging>
   <url>http://jkniv.sf.net</url>
-  <description>JAAS Hybrid realm module (LDAP and JDBC) for Jetty</description>
+  <description>JAAS Hybrid realm module (LDAP, JDBC, CouchDB) for Jetty</description>
 
   <properties>
     <maven.compiler.source>1.7</maven.compiler.source>
