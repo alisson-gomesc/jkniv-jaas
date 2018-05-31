@@ -67,7 +67,7 @@
     </dependency>    
     </dependencies>  
   <parent>
-    <version>0.3.1</version>
+    <version>0.3.2</version>
     <groupId>net.sf.jkniv</groupId>
     <artifactId>jkniv-jaas</artifactId>
   </parent>
