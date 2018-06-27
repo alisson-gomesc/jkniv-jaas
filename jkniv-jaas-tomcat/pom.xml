@@ -5,7 +5,7 @@
   <parent>
     <groupId>net.sf.jkniv</groupId>
     <artifactId>jkniv-jaas</artifactId>
-    <version>0.3.2</version>
+    <version>0.3.3</version>
   </parent>
   
   <artifactId>jkniv-jaas-tomcat</artifactId>
@@ -25,7 +25,6 @@
     <dependency>
       <groupId>net.sf.jkniv</groupId>
       <artifactId>jkniv-jaas-common</artifactId>
-      <version>0.3.1</version>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
