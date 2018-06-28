@@ -5,7 +5,7 @@
   <parent>
     <groupId>net.sf.jkniv</groupId>
     <artifactId>jkniv-jaas</artifactId>
-    <version>0.3.3</version>
+    <version>0.3.4</version>
   </parent>
   
   <artifactId>jkniv-jaas-tomcat</artifactId>

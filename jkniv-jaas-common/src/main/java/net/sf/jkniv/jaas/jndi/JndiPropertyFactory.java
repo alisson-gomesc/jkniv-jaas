@@ -21,6 +21,7 @@ package net.sf.jkniv.jaas.jndi;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 import javax.naming.Context;
 import javax.naming.Name;
@@ -39,6 +40,8 @@ import javax.naming.spi.ObjectFactory;
  */
 public class JndiPropertyFactory implements ObjectFactory
 {
+    private static final Logger LOG = Logger.getLogger(JndiPropertyFactory.class.getName());
+    
     /**
      * <p>Create and return a new {@code Properties} instance
      * that has been configured according to the properties of the
@@ -63,6 +66,7 @@ public class JndiPropertyFactory implements ObjectFactory
         Reference ref = (Reference) obj;
         if (!"java.util.Properties".equals(ref.getClassName()))
         {
+            LOG.warning("Type of resource must be [java.util.Properties] found [" + ref.getClassName() + "]");
             return (null);
         }
         
@@ -70,7 +74,7 @@ public class JndiPropertyFactory implements ObjectFactory
         for (Enumeration iter = ref.getAll(); iter.hasMoreElements();)
         {
             StringRefAddr addr = (StringRefAddr) iter.nextElement();
-            System.out.println(addr.getType() + "=" + addr.getContent());
+            LOG.finer("add property ["+addr.getType() + "] = " + addr.getContent()+" to Properties resource");
             properties.put(addr.getType(), (addr.getContent() == null) ? "" : addr.getContent());
         }
         return (properties);

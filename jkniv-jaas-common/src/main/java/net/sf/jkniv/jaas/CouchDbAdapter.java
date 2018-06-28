@@ -30,7 +30,6 @@ import javax.security.auth.login.LoginException;
 
 public class CouchDbAdapter
 {
-    
     private static final Logger LOG                           = MyLoggerFactory.getLogger(CouchDbAdapter.class);
     
     public static final String  PROP_CIPHER_PASSWD            = "cipher-algorithm";
