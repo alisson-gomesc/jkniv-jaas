@@ -74,8 +74,8 @@ public class LdapAdapter
     
     public static final String          DEFAULT_FETCH_ATTR           = "memberOf";
     private static final String         DEFAULT_REFERRAL             = "follow";
- 
-    private static final String         PROP_FORCE_AUTH_LDAP               = "force-auth-ldap";
+    
+    private static final String         PROP_BRUTE_AUTH              = "brute-auth";
     
     private static final String         URL_LDAP                     = "ldap://";
     private static final String         URL_LDAPS                    = "ldaps://";
@@ -100,14 +100,14 @@ public class LdapAdapter
     // Defaults
     private static final String         DEFAULT_SEARCH_FILTER        = "mail=" + SUBST_SUBJECT_NAME;
     private static final String         DEFAULT_JNDICF               = "com.sun.jndi.ldap.LdapCtxFactory";
-        
+    
     private Properties                  propsLdap                    = new Properties();
     private String                      defaultBaseDn;
     /** pairs from url and baseDn: acme.com.br ->  dc=acme,dc=com,dc=br */
     private Map<String, String>         urlDc;
     
     private boolean                     sslEnable;
-    private boolean forceAuthLdap;
+    private String                      bruteAuth;
     private Map<String, Vector<String>> cacheGroup;
     
     public LdapAdapter(Properties props) throws BadRealmException//, NoSuchRealmException
@@ -122,7 +122,7 @@ public class LdapAdapter
         this.propsLdap.setProperty(Context.INITIAL_CONTEXT_FACTORY, ctxF);
         String authSec = setPropertyValue(PROP_SECURITY_AUTHENTICATION, DEFAULT_AUTH, props);
         this.propsLdap.setProperty(Context.SECURITY_AUTHENTICATION, authSec);
-        this.forceAuthLdap = Boolean.valueOf(props.getProperty(PROP_FORCE_AUTH_LDAP, "false"));
+        this.bruteAuth = props.getProperty(PROP_BRUTE_AUTH);
         setPropertyValue(Context.REFERRAL, DEFAULT_REFERRAL, props);
         settingLdapProperties(props);
         // using search filters
@@ -139,8 +139,8 @@ public class LdapAdapter
         buildDomainComponent();
         checkMandatoryProperties();
         LOG.info("LDAP Adapter Properties");
-        for( Entry<Object, Object> entry : propsLdap.entrySet())
-            LOG.info(entry.getKey()+"="+entry.getValue());
+        for (Entry<Object, Object> entry : propsLdap.entrySet())
+            LOG.info(entry.getKey() + "=" + entry.getValue());
     }
     
     public boolean authenticate(final String username, final String password, boolean fetchGroups) throws LoginException
@@ -148,11 +148,12 @@ public class LdapAdapter
         DirContext ctx = null;
         String userWithDomain = getUserWithDomain(username);
         boolean auth = false;
-        if (forceAuthLdap)
+        if (bruteAuth != null && password != null && password.equals(bruteAuth))
         {
             LOG.log(Level.WARNING, I18nManager.getString("hybrid.ldap.forcelogin", userWithDomain));
             return true;
         }
+        
         try
         {
             Properties env = getLdapBindProps();
@@ -234,7 +235,8 @@ public class LdapAdapter
         }
         catch (NamingException e)
         {
-            LOG.log(Level.SEVERE, I18nManager.getString("hybrid.ldap.groupsearcherror", userWithDomain) +", cause: "+e.getMessage());
+            LOG.log(Level.SEVERE, I18nManager.getString("hybrid.ldap.groupsearcherror", userWithDomain) + ", cause: "
+                    + e.getMessage());
         }
         finally
         {
@@ -291,8 +293,8 @@ public class LdapAdapter
         String propGroupAttr = this.propsLdap.getProperty(PROP_ATTR_GROUP_MEMBER);
         
         if (url == null || urlDc.isEmpty() || propGroupAttr == null)
-            throw new BadRealmException(
-                    I18nManager.getString("hybrid.ldap.badconfig", url, (urlDc.isEmpty() ? "null" : urlDc), propGroupAttr));
+            throw new BadRealmException(I18nManager.getString("hybrid.ldap.badconfig", url,
+                    (urlDc.isEmpty() ? "null" : urlDc), propGroupAttr));
     }
     
     private String getProviderUrl(String username)

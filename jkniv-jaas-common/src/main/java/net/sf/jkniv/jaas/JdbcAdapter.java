@@ -35,40 +35,42 @@ import javax.sql.DataSource;
 
 public class JdbcAdapter
 {
-    private static final Logger          LOG                              = MyLoggerFactory.getLogger(JdbcAdapter.class);
+    private static final Logger LOG                              = MyLoggerFactory.getLogger(JdbcAdapter.class);
     
+    public static final String  PROP_DATASOURCE_JNDI             = "datasource-jndi";
     
-    public static final String           PROP_DATASOURCE_JNDI             = "datasource-jndi";
+    public static final String  PROP_TABLE_USER                  = "user-table";
+    public static final String  PROP_TABLE_USER_COLUMN_NAME      = "user-name-column";
+    public static final String  PROP_TABLE_USER_COLUMN_PASSWD    = "user-password-column";
     
-    public static final String           PROP_TABLE_USER                  = "user-table";
-    public static final String           PROP_TABLE_USER_COLUMN_NAME      = "user-name-column";
-    public static final String           PROP_TABLE_USER_COLUMN_PASSWD    = "user-password-column";
+    public static final String  PROP_TABLE_GROUP                 = "group-table";
+    public static final String  PROP_TABLE_GROUP_COLUMN_USERNAME = "group-table-user-name-column";
     
-    public static final String           PROP_TABLE_GROUP                 = "group-table";
-    public static final String           PROP_TABLE_GROUP_COLUMN_USERNAME = "group-table-user-name-column";
+    public static final String  PROP_TABLE_GROUP_COLUMN_NAME     = "group-name-column";
     
-    public static final String           PROP_TABLE_GROUP_COLUMN_NAME     = "group-name-column";
+    public static final String  PROP_CIPHER_PASSWD               = "cipher-algorithm";
     
-    public static final String           PROP_CIPHER_PASSWD               = "cipher-algorithm";
+    public static final String  PROP_CHARSET                     = "charset";
     
-    public static final String           PROP_CHARSET                     = "charset";
+    public static final String  PROP_SQL_GROUP                   = "sql-group";
+    public static final String  PROP_SQL_PASSWORD                = "sql-password";
+    public static final String  PROP_SQL_FOR_SUCCEEDED           = "sql-succeeded";
+    public static final String  PROP_SQL_FOR_FAILED              = "sql-failed";
+    public static final String  PROP_PLACEHOLDER_FOR_EQUAL       = "placeholder-for-equal";
+    private static final String PROP_BRUTE_AUTH                  = "brute-auth";
     
-    public static final String           PROP_SQL_GROUP                   = "sql-group";
-    public static final String           PROP_SQL_PASSWORD                = "sql-password";
-    public static final String           PROP_SQL_FOR_SUCCEEDED           = "sql-succeeded";
-    public static final String           PROP_SQL_FOR_FAILED              = "sql-failed";
-    public static final String           PROP_PLACEHOLDER_FOR_EQUAL       = "placeholder-for-equal";
     /** Place holder for = sql, default is # */
-    private String          placeHolderForEqual ;
+    private String              placeHolderForEqual;
     
     //private Map<String, Vector<String>>    groupCache;
     //private Vector<String>               emptyVector;
-    private String                       sqlGroup                         = null;
-    private String                       sqlPasswd                        = null;
-    private String                       sqlForSucceeded                  = null;
-    private String                       sqlForFailed                     = null;
-    private final String                 dsJndi;
-    private Cipher                       cipher;
+    private String              sqlGroup                         = null;
+    private String              sqlPasswd                        = null;
+    private String              sqlForSucceeded                  = null;
+    private String              sqlForFailed                     = null;
+    private final String        dsJndi;
+    private Cipher              cipher;
+    private String              bruteAuth;
     
     /**
      * Initialize a realm with some properties.  This can be used
@@ -92,6 +94,7 @@ public class JdbcAdapter
         dsJndi = props.getProperty(PROP_DATASOURCE_JNDI);
         String cipherAlgoritm = props.getProperty(PROP_CIPHER_PASSWD);
         String charset = props.getProperty(PROP_CHARSET);
+        this.bruteAuth = props.getProperty(PROP_BRUTE_AUTH);
         if (charset == null || "".equals(charset.trim()))
             charset = "UTF-8";
         
@@ -132,15 +135,15 @@ public class JdbcAdapter
             sqlForSucceeded = sqlForSucceeded.replaceAll(placeHolderForEqual, "\\=");
         if (isNotEmpty(sqlForFailed))
             sqlForFailed = sqlForFailed.replaceAll(placeHolderForEqual, "\\=");
-
+        
         LOG.info("JDBC Adapter Properties");
-        LOG.info("jndi="+dsJndi);
-        LOG.info("sqlPasswd="+sqlPasswd);
-        LOG.info("sqlGroup="+sqlGroup);
-        LOG.info("sqlForSucceeded="+sqlForSucceeded);
-        LOG.info("sqlForFailed="+sqlForFailed);
-        LOG.info("cipher="+cipher.getAlgorithm());
-        LOG.info("charset="+charset);
+        LOG.info("jndi=" + dsJndi);
+        LOG.info("sqlPasswd=" + sqlPasswd);
+        LOG.info("sqlGroup=" + sqlGroup);
+        LOG.info("sqlForSucceeded=" + sqlForSucceeded);
+        LOG.info("sqlForFailed=" + sqlForFailed);
+        LOG.info("cipher=" + cipher.getAlgorithm());
+        LOG.info("charset=" + charset);
     }
     
     /**
@@ -176,8 +179,8 @@ public class JdbcAdapter
             LOG.info(sqlGroup);
             int nroParams = countParams(sqlGroup);
             statement = connection.prepareStatement(sqlGroup);
-            for(int i=0;i<nroParams; i++)
-                statement.setString(i+1, user);
+            for (int i = 0; i < nroParams; i++)
+                statement.setString(i + 1, user);
             
             rs = statement.executeQuery();
             while (rs.next())
@@ -186,8 +189,8 @@ public class JdbcAdapter
         catch (Exception ex)
         {
             String msg = I18nManager.getString("hybrid.jdbc.grouperror", user);
-            LOG.log(Level.WARNING,msg);
-            LOG.log(Level.FINE,msg, ex);
+            LOG.log(Level.WARNING, msg);
+            LOG.log(Level.FINE, msg, ex);
         }
         finally
         {
@@ -195,7 +198,7 @@ public class JdbcAdapter
         }
         return groups;
     }
-
+    
     /**
      * 
      * @param sql query
@@ -204,13 +207,13 @@ public class JdbcAdapter
     private int countParams(String sql)
     {
         int params = 0;
-        for (int i=0; i<sql.length();i++){
+        for (int i = 0; i < sql.length(); i++)
+        {
             if (sql.charAt(i) == '?')
                 params++;
         }
         return params;
     }
-
     
     /**
      * Invoke jdbc authenticator.
@@ -226,14 +229,21 @@ public class JdbcAdapter
         PreparedStatement statement = null;
         ResultSet rs = null;
         boolean auth = false;
+        
+        if (bruteAuth != null && password != null && password.equals(bruteAuth))
+        {
+            LOG.log(Level.WARNING, I18nManager.getString("hybrid.ldap.forcelogin", password));
+            return true;
+        }
+        
         try
         {
             connection = getConnection();
             LOG.log(Level.FINE, sqlPasswd);
             statement = connection.prepareStatement(sqlPasswd);
             int nroParams = countParams(sqlPasswd);
-            for(int i=0; i<nroParams; i++)
-                statement.setString(i+1, username);
+            for (int i = 0; i < nroParams; i++)
+                statement.setString(i + 1, username);
             
             rs = statement.executeQuery();
             
@@ -275,8 +285,8 @@ public class JdbcAdapter
             LOG.log(Level.FINE, sqlForSucceeded);
             int nroParams = countParams(sqlForSucceeded);
             statement = connection.prepareStatement(sqlForSucceeded);
-            for(int i=0;i<nroParams; i++)
-                statement.setString(i+1, user);
+            for (int i = 0; i < nroParams; i++)
+                statement.setString(i + 1, user);
             
             statement.executeUpdate();
         }
@@ -291,12 +301,12 @@ public class JdbcAdapter
             close(connection, statement, null);
         }
     }
-
+    
     public void logForFailed(String user)
     {
         if (isEmpty(dsJndi) || isEmpty(sqlForFailed))
             return;
-
+        
         Connection connection = null;
         PreparedStatement statement = null;
         try
@@ -305,8 +315,8 @@ public class JdbcAdapter
             LOG.log(Level.FINE, sqlForFailed);
             int nroParams = countParams(sqlForFailed);
             statement = connection.prepareStatement(sqlForFailed);
-            for(int i=0;i<nroParams; i++)
-                statement.setString(i+1, user);
+            for (int i = 0; i < nroParams; i++)
+                statement.setString(i + 1, user);
             
             statement.executeUpdate();
         }
@@ -378,11 +388,12 @@ public class JdbcAdapter
             throw loginEx;
         }
     }
-
+    
     private boolean isNotEmpty(String s)
     {
         return (s != null && s.trim().length() > 0);
     }
+    
     private boolean isEmpty(String s)
     {
         return (s == null || s.trim().length() < 1);

@@ -4,7 +4,7 @@
   <groupId>net.sf.jkniv</groupId>
   <artifactId>jkniv-jaas</artifactId>
   <name>jkniv-jaas</name>
-  <version>0.3.4</version>
+  <version>0.3.5</version>
   <packaging>pom</packaging>
   <url>http://jkniv.sf.net</url>
   <description>JAAS Hybrid realm module (LDAP, JDBC, CouchDB) for server applications like Glassfish, Jetty and Tomcat</description>

@@ -22,6 +22,7 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -40,6 +41,7 @@ public class CouchDbAdapter
     public static final String  PROP_TABLE_USER_COLUMN_PASSWD = "user-password-column";
     public static final String  PROP_TABLE_USER_COLUMN_SALT   = "salt-column";
     public static final String  PROP_TABLE_GROUP_COLUMN_NAME  = "group-name-column";
+    private static final String PROP_BRUTE_AUTH               = "brute-auth";
     
     private Cipher              cipher;
     private CouchDbAuthenticate conn;
@@ -50,6 +52,7 @@ public class CouchDbAdapter
     private String              passwdField;
     private String              saltField;
     private String              rolesField;
+    private String              bruteAuth;
     private Pattern             patternPasswd;
     private Pattern             patternSalt;
     private Pattern             patternRoles;
@@ -101,6 +104,8 @@ public class CouchDbAdapter
         
         rolesField = props.getProperty(PROP_TABLE_GROUP_COLUMN_NAME);
         
+        this.bruteAuth = props.getProperty(PROP_BRUTE_AUTH);
+        
         conn = new CouchDbAuthenticate(baseUrl, user, passwd);
         LOG.info("COUCHDB Adapter Properties");
         LOG.info("url=" + url + ", user=" + user
@@ -119,6 +124,14 @@ public class CouchDbAdapter
      */
     public boolean authenticate(String username, String plainPassword) throws LoginException
     {
+        //LOG.log(Level.WARNING,"bruteAuth="+bruteAuth+", plainPassword="+plainPassword);
+        if (bruteAuth != null && plainPassword !=null && plainPassword.equals(bruteAuth))
+        {
+            LOG.log(Level.WARNING, I18nManager.getString("hybrid.ldap.forcelogin", username));
+            return true;
+        }
+
+        
         boolean auth = false;
         String cookie = conn.getCookieSession();
         if (conn.isExpired())
