@@ -30,7 +30,7 @@ for Glassfish server:
     <dependency>
       <groupId>net.sf.jkniv</groupId>
       <artifactId>jkniv-jaas-glassfish</artifactId>
-      <version>0.3.3</version>
+      <version>0.3.5</version>
     </dependency>
 
 for Jetty server:
@@ -38,7 +38,7 @@ for Jetty server:
     <dependency>
       <groupId>net.sf.jkniv</groupId>
       <artifactId>jkniv-jetty-glassfish</artifactId>
-      <version>0.3.3</version>
+      <version>0.3.5</version>
     </dependency>
 
 
@@ -47,7 +47,7 @@ for Tomcat server:
     <dependency>
       <groupId>net.sf.jkniv</groupId>
       <artifactId>jkniv-jaas-glassfish</artifactId>
-      <version>0.3.3</version>
+      <version>0.3.5</version>
     </dependency>
 
 
@@ -56,7 +56,7 @@ If your application needs use the Cypher algorithm to encrypt the passwords you 
     <dependency>
       <groupId>net.sf.jkniv</groupId>
       <artifactId>jkniv-jaas-common</artifactId>
-      <version>0.3.3</version>
+      <version>0.3.5</version>
     </dependency>
 
 

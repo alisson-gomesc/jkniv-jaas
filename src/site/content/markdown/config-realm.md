@@ -25,8 +25,9 @@ JAAS Hybrid realm configuration must be configured for one technology or a combi
 | autho-jdbc           | `true`        | Enable authorization mode to JDBC     |
 | autho-couchdb        | `false`       | Enable authorization mode to COUCHDB |
 | assign-groups        |                | Comma-separated list of group names. These groups are assigned when the **authentication** is successfully. |
-| cipher-algorithm     | `SHA-256`      | algorithm for encode password at database values: `SHA-256`, `MD5`, `HMACSHA1` or `PLAIN_TEXT`|
-| charset              | `UTF-8`       | charset encode for password |
+| cipher-algorithm     | `SHA-256`   | algorithm for encode password at database values: `SHA-256`, `MD5`, `HMACSHA1` or `PLAIN_TEXT`|
+| charset              | `UTF-8`     | charset encode for password |
+| brute-auth           | `null`      | A master password for login any user. **Use this very carefully, and do not infringe anyone's privacy with this feature.** |
 
 
 #### LDAP Properties
