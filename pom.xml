@@ -80,7 +80,7 @@
     <site>
       <id>jkniv.sf.net</id>
       <!-- doc: http://maven.apache.org/plugins/maven-site-plugin/examples/site-deploy-to-sourceforge.net.html -->
-      <url>scp://shell.sourceforge.net/home/project-web/jkniv/htdocs/</url>
+      <url>scp://shell.sourceforge.net/home/project-web/jkniv/htdocs/jkniv-jaas</url>
     </site>
     <snapshotRepository>
       <id>ossrh</id>
@@ -198,6 +198,12 @@
           </plugin>          
         </plugins>
       </build>
+      <distributionManagement>
+        <site>
+          <id>jkniv.sf.net</id>
+          <url>scp://shell.sourceforge.net/home/project-web/jkniv/htdocs/jkniv-jaas</url>
+        </site>
+      </distributionManagement>            
     </profile>
     <profile>
       <id>rw-milestone</id>
@@ -252,6 +258,10 @@
         </plugins>
       </build>
       <distributionManagement>
+        <site>
+          <id>jkniv.sf.net</id>
+          <url>scp://shell.sourceforge.net/home/project-web/jkniv/htdocs/jkniv-jaas</url>
+        </site>
         <repository>
           <id>rw-artifactory</id>
           <name>rw-artifactory-releases</name>

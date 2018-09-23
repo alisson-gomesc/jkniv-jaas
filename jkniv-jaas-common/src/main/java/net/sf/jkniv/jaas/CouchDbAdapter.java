@@ -201,8 +201,12 @@ public class CouchDbAdapter
     
     private String extractUrlFromSchema()
     {
-        int ch = this.url.lastIndexOf("/");
-        String baseUrl = url.substring(0, ch);
+        String baseUrl = null;
+        if(this.url != null)
+        {
+            int ch = this.url.lastIndexOf("/");
+            baseUrl = url.substring(0, ch);
+        }
         return baseUrl;
     }
     

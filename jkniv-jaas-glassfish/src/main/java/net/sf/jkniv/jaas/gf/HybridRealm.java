@@ -39,7 +39,6 @@ import com.sun.enterprise.security.auth.realm.IASRealm;
 import com.sun.enterprise.security.auth.realm.InvalidOperationException;
 import com.sun.enterprise.security.auth.realm.NoSuchRealmException;
 import com.sun.enterprise.security.auth.realm.NoSuchUserException;
-import com.sun.enterprise.util.i18n.StringManager;
 
 import net.sf.jkniv.jaas.CouchDbAdapter;
 import net.sf.jkniv.jaas.I18nManager;
@@ -60,7 +59,7 @@ public class HybridRealm extends AppservRealm
     public static final String         PROP_AUTHO_TYPE_COUCHDB = "autho-couchdb";
     public static final String         PROP_ASSIGN_GROUPS   = "assign-groups";
     public static final String         PROP_AUTH_TYPE       = "hybrid+ldap+jdbc";
-    private static final StringManager i18n                 = StringManager.getManager(JdbcAdapter.class);
+    //private static final StringManager i18n                 = StringManager.getManager(HybridRealm.class);
     private JdbcAdapter                jdbcAdapter;
     private LdapAdapter                ldapAdapter;
     private CouchDbAdapter             couchDbAdapter;
@@ -76,7 +75,7 @@ public class HybridRealm extends AppservRealm
     @Override
     public void init(Properties props) throws BadRealmException, NoSuchRealmException
     {
-        LOG.info(i18n.getString("hybrid.realm.init"));
+        LOG.info(I18nManager.getString("hybrid.realm.init"));
         Properties propsRealm = getProperties();
         this.cacheGroup = new HashMap<String, Vector>();
         this.emptyVector = new Vector<String>();
