@@ -18,12 +18,12 @@ JAAS Hybrid realm configuration must be configured for one technology or a combi
 
 | Property             | Default        | Description|
 |----------------------|----------------|--------------------------------------|
-| authe-ldap           | `true`        | Enable authentication mode to LDAP    |
-| authe-jdbc           | `false`       | Enable authentication mode to JDBC    |
-| authe-couchdb        | `false`       | Enable authentication mode to COUCHDB |
-| autho-ldap           | `false`       | Enable authorization mode to LDAP     |
-| autho-jdbc           | `true`        | Enable authorization mode to JDBC     |
-| autho-couchdb        | `false`       | Enable authorization mode to COUCHDB |
+| authe-ldap           | `true`        | Enable authentication mode for LDAP    |
+| authe-jdbc           | `false`       | Enable authentication mode for JDBC    |
+| authe-couchdb        | `false`       | Enable authentication mode for COUCHDB |
+| autho-ldap           | `false`       | Enable authorization mode for LDAP     |
+| autho-jdbc           | `true`        | Enable authorization mode for JDBC     |
+| autho-couchdb        | `false`       | Enable authorization mode for COUCHDB |
 | assign-groups        |                | Comma-separated list of group names. These groups are assigned when the **authentication** is successfully. |
 | cipher-algorithm     | `SHA-256`   | algorithm for encode password at database values: `SHA-256`, `MD5`, `HMACSHA1` or `PLAIN_TEXT`|
 | charset              | `UTF-8`     | charset encode for password |
