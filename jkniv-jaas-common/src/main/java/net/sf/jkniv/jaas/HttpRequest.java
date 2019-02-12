@@ -34,27 +34,32 @@ import javax.security.auth.login.LoginException;
 
 class HttpRequest
 {
-    private static final Logger          LOG                              = MyLoggerFactory.getLogger(HttpRequest.class);
-    public enum Method {GET, POST, PUT, DELETE};
-    private String            url;
-    private String            body;
-    private HttpURLConnection conn = null;
-    private Method method;
+    private static final Logger LOG = MyLoggerFactory.getLogger(HttpRequest.class);
+    
+    public enum Method
+    {
+        GET, POST, PUT, DELETE
+    };
+    
+    private String              url;
+    private String              body;
+    private HttpURLConnection   conn = null;
+    private Method              method;
     private Map<String, String> headers;
-
+    
     public HttpRequest(String url)
     {
         this(url, Method.GET);
     }
-
+    
     public HttpRequest(String url, Method method)
     {
         super();
         this.method = method;
         this.url = url;
-        this.headers = new HashMap<String,String>();
+        this.headers = new HashMap<String, String>();
     }
-
+    
     public HttpResponse send() throws LoginException
     {
         return send(this.body);
@@ -77,7 +82,7 @@ class HttpRequest
             if (Method.POST == method || Method.PUT == method)
             {
                 wr = new OutputStreamWriter(conn.getOutputStream());
-                wr.write(body);            
+                wr.write(body);
                 wr.flush();
             }
             br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
@@ -86,11 +91,11 @@ class HttpRequest
             {
                 response.append(line + "\n");
             }
-            httpResponse = new HttpResponse(conn.getResponseCode(), response.toString(), conn.getHeaderFields());            
+            httpResponse = new HttpResponse(conn.getResponseCode(), response.toString(), conn.getHeaderFields());
         }
         catch (Exception ex)
         {
-            LOG.log(Level.SEVERE, "Error to submit ["+method+"] HTTP request", ex);
+            LOG.log(Level.SEVERE, "Error to submit [" + method + "] HTTP request", ex);
             throw new LoginException("Cannot connect to COUCHDB using url [" + url + "]");
         }
         finally
@@ -122,7 +127,6 @@ class HttpRequest
         return httpResponse;
     }
     
-    
     private HttpURLConnection openHttpConnection() throws LoginException
     {
         HttpURLConnection httpURLConnection = null;
@@ -143,9 +147,16 @@ class HttpRequest
         }
         catch (IOException e)
         {
+            LOG.log(Level.WARNING, "Cannot connect to COUCHDB [" + toString() + "]", e);
             throw new LoginException("Cannot connect to COUCHDB using url [" + url + "]");
         }
         return httpURLConnection;
+    }
+    
+    @Override
+    public String toString()
+    {
+        return "HttpRequest [url=" + url + ", headers=" + headers + ", method=" + method + ", body=" + body + "]";
     }
     
 }

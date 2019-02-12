@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<statements 
+  context="radar-advisory"
+  xmlns="http://jkniv.sf.net/schema/sqlegance/statements"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xsi:schemaLocation="http://jkniv.sf.net/schema/sqlegance/statements
+       http://jkniv.sf.net/schema/sqlegance/sqlegance-stmt.xsd">
+  
+  <select id="supervisedRoute" returnType="br.com.rwit.tecno3t.router.radaradvisory.model.SupervisedRoute" groupBy="customerId,objectId,evtDt">
+  <one-to-many property="locations" typeOf="br.com.rwit.tecno3t.router.radaradvisory.model.Location"/>
+   select 
+     evt_dt,
+     customer_id,
+     object_id,
+     start_dt,
+     end_dt,
+     last_check,
+     min_dist as min_distance,
+     polygon_wkt_buf,
+     mode_type,
+     radius_buffer,
+     minor_dist as "locations.minorDistance",
+     place as "locations.place",
+     lat as "locations.lat",
+     lng as "locations.lng",
+     local_type as "locations.localType",
+     plan_order as "locations.planOrder",
+     real_order as "locations.realOrder"
+   from ROUTE_SUPERVISED 
+   where customer_id = :customerId and object_id = :objectId and evt_dt = :evtDt
+  </select>
+  
+  <select id="checkRoutes" returnType="br.com.rwit.tecno3t.router.radaradvisory.model.Route">
+   select 
+    evt_dt, customer_id, object_id, lat, lng, lost, offline,
+    total_verify, total_out, last_check, update_at
+   from ROUTES_FROM_DAY 
+   where customer_id = :customerId and object_id in (:in:objectId) and evt_dt = :evtDt
+  </select>  
+
+  <select id="wktRoute" returnType="java.lang.String">
+   select 
+     polygon_wkt_buf
+   from ROUTE_SUPERVISED 
+   where customer_id = :customerId and object_id = :objectId and evt_dt = :evtDt
+  </select>  
+
+  <insert id="supervisedRoute#add">
+    INSERT INTO route_supervised
+    (customer_id, object_id, evt_dt, plan_order, start_dt, end_dt, lat, lng, min_dist, minor_dist, place, polygon_wkt_buf, real_order, mode_type, local_type, last_check, radius_buffer)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  </insert>
+
+  <select id="routeOfDay" returnType="br.com.rwit.tecno3t.router.radaradvisory.model.Route">
+    SELECT evt_dt, customer_id, object_id, lat, lng, total_verify, total_out, lost, offline, last_check, update_at 
+    FROM routes_from_day
+    WHERE evt_dt = :evtDt
+  </select>
+
+  <insert id="routeDay#add">
+    INSERT INTO ROUTES_FROM_DAY
+    (evt_dt, customer_id, object_id, lat, lng, total_verify, total_out, lost, offline, last_check, update_at)
+    VALUES (:evtDt, :customerId, :objectId, :lat, :lng, :totalVerify, :totalOut, :lost, :offline, :lastCheck, :updateAt)
+  </insert>
+
+</statements>

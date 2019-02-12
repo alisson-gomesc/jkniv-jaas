@@ -51,31 +51,31 @@ Create new file `tomcat-install/conf/login.conf` to config the `hybridRealm`. Th
 
 - Modify `web.xml` from your application configuring the new realm `acme-realm`:
     
-     <security-role>
+    <security-role>
       <description>Any user authenticated</description>
       <role-name>auth</role-name>
-     </security-role>  
-      <login-config> 
-       <auth-method>FORM</auth-method> 
-       <realm-name>acme-realm</realm-name> 
-       <form-login-config> 
+    </security-role>  
+    <login-config> 
+      <auth-method>FORM</auth-method> 
+      <realm-name>acme-realm</realm-name> 
+      <form-login-config> 
         <form-login-page>/login.html</form-login-page> 
         <form-error-page>/error.html</form-error-page> 
-       </form-login-config> 
-      </login-config> 
-      <security-constraint>
-        <web-resource-collection>
-          <web-resource-name>Exclude from Security</web-resource-name>
-          <url-pattern>/api/*</url-pattern>
-        </web-resource-collection>
-        <auth-constraint>
-         <role-name>auth</role-name>
-        </auth-constraint>
-      </security-constraint>
+      </form-login-config> 
+    </login-config> 
+    <security-constraint>
+      <web-resource-collection>
+        <web-resource-name>Exclude from Security</web-resource-name>
+        <url-pattern>/api/*</url-pattern>
+      </web-resource-collection>
+      <auth-constraint>
+        <role-name>auth</role-name>
+      </auth-constraint>
+    </security-constraint>
 
 - Set up Tomcat to to find `tomcat-install/conf/login.conf` file specifying its location to the JVM, for instance by setting the environment variable: JAVA_OPTS=$JAVA_OPTS -Djava.security.auth.login.config==$CATALINA_BASE/conf/login.conf
     
-- start Tomcat (Go forest, go)
+- start Tomcat (run, forrest, run)
 
 *Note:* If [Enable Single Sign On for Tomcat][5] it's a requirement uncomment the `<Valve>`element from `tomcat-install/conf/server.xml` file.
 

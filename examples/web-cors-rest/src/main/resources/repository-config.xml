@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<repository-config 
+  xmlns="http://jkniv.sf.net/schema/sqlegance/config" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://jkniv.sf.net/schema/sqlegance/config 
+  http://jkniv.sf.net/schema/sqlegance/sqlegance-config.xsd">
+
+ <repository name="gi-posgis" type="JDBC">
+  <description>Acesso ao banco de dados GIS</description>
+  <!--jndi-data-source>java:comp/env/props/jdbc/3tclsgeo</jndi-data-source -->
+  <properties>
+   <property name="url" value="jdbc:postgresql://10.5.0.7:5432/routing_tomtom" />
+   <property name="password" value="tecno" />
+   <property name="user" value="tecno" />
+   <property name="driver" value="org.postgresql.Driver" />
+  </properties>
+ </repository>
+ <repository name="gi-device" type="CASSANDRA">
+  <description>Acesso ao banco de dados para resoluçao de endereços</description>
+  <jndi-data-source>java:comp/env/props/db3t-device</jndi-data-source>
+ </repository>
+ <repository name="radar-advisory" type="CASSANDRA">
+  <description>Acesso ao banco de dados com as rotas supervisadas</description>
+  <properties>
+   <property name="url" value="10.1.200.89,10.1.200.90" />
+   <property name="password" value="cassandra" />
+   <property name="user" value="cassandra" />
+   <property name="schema" value="radar_advisory" />
+  </properties>
+ </repository>
+</repository-config>

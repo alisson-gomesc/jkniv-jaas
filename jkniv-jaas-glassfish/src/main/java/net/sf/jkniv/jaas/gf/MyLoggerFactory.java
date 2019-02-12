@@ -25,7 +25,7 @@ import com.sun.logging.LogDomains;
 
 class MyLoggerFactory
 {
-    public static Logger getLogger(Class clazz)
+    public static Logger getLogger(Class<?> clazz)
     {
         return LogDomains.getLogger(clazz, "net.sf.jkniv.jaas.gf");
     }

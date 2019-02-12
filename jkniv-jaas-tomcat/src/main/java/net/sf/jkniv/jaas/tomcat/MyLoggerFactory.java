@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 
 class MyLoggerFactory
 {
-    public static Logger getLogger(Class clazz)
+    public static Logger getLogger(Class<?> clazz)
     {
         return Logger.getLogger(clazz.getName());
     }

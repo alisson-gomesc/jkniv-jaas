@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:camel="http://camel.apache.org/schema/spring"
+  xsi:schemaLocation="
+         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+         http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
+
+  <!-- DataSource Connection from test environment -->
+  <!-- 
+  <bean id="ds-track" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+    <property name="driverClassName" value="com.dbschema.CassandraJdbcDriver" />
+    <property name="url" value="jdbc:cassandra://127.0.0.1:9042/db3t" />
+    <property name="username" value="cassandra" />
+    <property name="password" value="cassandra" />
+  </bean>
+  <bean id="sql-track" class="org.apache.camel.component.sql.SqlComponent">
+    <property name="dataSource" ref="ds-track" />
+  </bean>
+  -->
+
+</beans>

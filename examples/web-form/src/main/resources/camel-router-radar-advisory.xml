@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns:camel="http://camel.apache.org/schema/spring"
+ xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
+
+ <import resource="camel-router-radar-advisory-beans.xml" />
+
+ <camelContext xmlns="http://camel.apache.org/schema/spring" id="radar-advisory">
+
+  <camel:propertyPlaceholder id="placeholder"
+   location="config-router-radar-advisory.properties,
+                sql-router-radar-advisory.properties" />
+
+  <dataFormats>
+   <json id="supervisedRouteJson" prettyPrint="true" library="Jackson" useList="true"
+    unmarshalTypeName="br.com.rwit.tecno3t.router.radaradvisory.model.SupervisedRoute" />
+   <json id="routeJson" prettyPrint="true" library="Jackson" useList="true"
+    unmarshalTypeName="br.com.rwit.tecno3t.router.radaradvisory.model.Route" />
+  </dataFormats>
+
+  <restConfiguration component="servlet" bindingMode="json" contextPath="radar-advisory/api"
+   port="8080">
+   <dataFormatProperty key="prettyPrint" value="true" />
+  </restConfiguration>
+
+
+  <!-- defines the rest services using the context-path /echo -->
+  <camel:rest path="/echo" consumes="text/plain" produces="text/plain">
+   <description>Serviço de teste Echo</description>
+   <camel:get uri="/ping">
+    <description>Serviço ping (keep-alive)</description>
+    <to uri="direct:keepalive" />
+   </camel:get>
+  </camel:rest>
+
+  <camel:rest path="/route" consumes="application/json" produces="application/json">
+   <description>Serviço que mantem atualizado os dados do objeto a ser rastreado</description>
+   <camel:post uri="/add">
+    <description>Adiciona uma nova rota para ser monitorada</description>
+    <to uri="direct:keepalive" />
+   </camel:post>
+   <camel:get uri="/update">
+    <description>Atualiza a localizacao do objeto a ser rastreador</description>
+    <to uri="direct:keepalive" />
+   </camel:get>
+  </camel:rest>
+
+  <camel:rest path="/routes" consumes="application/json" produces="application/json">
+   <description>Serviço que mantem atualizado os dados do objeto a ser rastreado</description>
+   <camel:get uri="/status/{customerId}">
+    <description>Retorna os ultimos dados proccessados de uma rota</description>
+    <to uri="direct:routes-status" />
+   </camel:get>
+   <camel:get uri="/wkt/{customerId}/{objectId}">
+    <description>Retorna os ultimos dados proccessados de uma rota</description>
+    <to uri="direct:route-wkt" />
+   </camel:get>
+  </camel:rest>
+
+  <camel:route id="keepalive">
+   <camel:description>Keep-alive mensagem que identifica que o serviço está ativo</camel:description>
+   <from uri="direct:keepalive" />
+   <log message="ping request for keep-alive" loggingLevel="DEBUG" logName="radar-advisory" />
+   <transform>
+    <constant>pong</constant>
+   </transform>
+  </camel:route>
+
+
+  <camel:route id="routes-status">
+   <camel:description>Recupera o status de todas as rotas de um determinado cliente (customerId)</camel:description>
+   <from uri="direct:routes-status" />
+   <unmarshal ref="routeJson" />
+   <log message="status of routes from ${body}" loggingLevel="DEBUG" logName="radar-advisory" />
+   <to uri="bean:routeService?method=listViewOfRoutes(${body})" />
+  </camel:route>
+
+  <camel:route id="route-wkt">
+   <camel:description>Recupera o poligono wkt da rota monitorada</camel:description>
+   <from uri="direct:route-wkt" />
+   <unmarshal ref="routeJson" />
+   <log message="wkt route from ${body}" loggingLevel="DEBUG" logName="radar-advisory" />
+   <to uri="bean:routeService?method=getWktRoute(${body})" />
+  </camel:route>
+
+  <camel:route id="routes-clsiv-get">
+   <camel:description>Busca as rotas do dia do CLSIV</camel:description>
+   <from uri="direct-vm:routes-clsiv-get" />
+   <log message="Invoking rest service to recover routes of day" loggingLevel="INFO" logName="radar-advisory" />
+   <to uri="http4://10.1.200.58/clsiv-rest/api/ctx-vendor/list/supervisedRoute" />
+   <unmarshal ref="supervisedRouteJson" />
+   <camel:split>
+    <simple>${body}</simple>
+    <to uri="bean:routeService?method=add(${body})" />   
+   </camel:split>
+  </camel:route>
+  
+  <camel:route id="last-routes-positions">
+   <camel:description>Busca as ultimas posiçoes das rotas do cliente e atualiza a informacao</camel:description>
+   <from uri="direct-vm:last-routes-positions" />
+   <log message="Invoking rest service to recover last positions of routes of day" loggingLevel="INFO" logName="radar-advisory" />
+   <to uri="http4://10.1.200.58/clsiv-rest/api/ctx-vendor/list/lastRoutesPositions" />
+   <unmarshal ref="routeJson" />
+   <to uri="bean:routeService?method=update(${body})" />   
+  </camel:route>
+  
+  
+  
+
+ </camelContext>
+</beans>

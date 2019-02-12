@@ -25,7 +25,7 @@ import org.eclipse.jetty.util.log.Logger;
 
 class MyLoggerFactory
 {
-    public static Logger getLogger(Class clazz)
+    public static Logger getLogger(Class<?> clazz)
     {
         return Log.getLogger(clazz);
     }

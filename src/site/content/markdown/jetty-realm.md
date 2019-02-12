@@ -106,7 +106,7 @@ Enable security jaas and jndi for jetty in `jetty-install/start.ini` file:
     --module=jaas
     jetty.jaas.login.conf=etc/login.conf
     
-- start Jetty. (Go forest, go)
+- start Jetty. (run, forrest, run)
 
 
 More information to configure [JNDI in Jetty 8] or [JNDI in Jetty 9]

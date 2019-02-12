@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Context path="/router-maxtrack" reloadable="true">
+ 
+ <ResourceLink type="java.util.Properties" 
+  name="props/db3t-useraccess" global="props/db3t-useraccess" />
+ 
+ <ResourceLink  type="java.util.Properties" 
+  name="props/db3t-acct" global="props/db3t-acct"/>
+ 
+ <ResourceLink type="java.util.Properties" 
+  name="props/db3t-device" global="props/db3t-device" />
+ 
+ <ResourceLink type="org.apache.activemq.ActiveMQConnectionFactory"  
+  name="jms/ConnectionFactory" global="jms/ConnectionFactory" />
+  
+ <ResourceLink type="org.apache.activemq.command.ActiveMQQueue" 
+  name="jms/MAILER/1.0" global="jms/MAILER/1.0" />
+  
+ <ResourceLink type="org.apache.activemq.command.ActiveMQQueue" 
+  name="jms/COMMANDS/1.0" global="jms/COMMANDS/1.0"/> 
+    
+</Context>

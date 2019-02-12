@@ -75,6 +75,7 @@ public class JndiPropertyFactory implements ObjectFactory
         {
             StringRefAddr addr = (StringRefAddr) iter.nextElement();
             LOG.finer("add property ["+addr.getType() + "] = " + addr.getContent()+" to Properties resource");
+            //System.out.println("add property ["+addr.getType() + "] = " + addr.getContent()+" to Properties resource");
             properties.put(addr.getType(), (addr.getContent() == null) ? "" : addr.getContent());
         }
         return (properties);

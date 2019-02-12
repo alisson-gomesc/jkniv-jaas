@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>{% block title %}{{ headers.title }}{% endblock %}</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <link rel="stylesheet" type="text/css" media="screen" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="http://www.apache.org/css/code.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="css/hub.css">
+
+    {% if headers.atom %}
+      <link rel="alternate" href="{{ headers.atom.url }}"
+            type="application/atom+xml" title="{{ headers.atom.title }}" />
+    {% endif %}
+
+    {% if headers.base %}<base href="{{ headers.base }}" />{% endif %}
+    {% if headers.notice %}<!-- {{ headers.notice }} -->{% endif %}
+  </head>
+
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/index.html"> Apache SIS&trade; </a>
+          <div class="nav-collapse">
+            <ul class="nav">
+              <li class="dropdown"> <a class="dropdown-toggle" data-toggle="dropdown">About<b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                  <li><a href="mail-lists.html">Mailing Lists</a></li>
+                  <li><a href="license.html">Project License</a></li>
+                  <li><a href="team-list.html">Project Team</a></li>
+                </ul>
+              </li>
+              <li class="dropdown"> <a class="dropdown-toggle" data-toggle="dropdown">Project Documentation<b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                  <li><a href="book/en/developer-guide.html">Developer guide</a></li>
+                  <li><a href="apidocs/index.html">Online Javadoc</a></li>
+                  <li><a href="downloads.html">Downloads</a></li>
+                  <li><a href="source.html">Source Code</a></li>
+                  <li><a href="code-patterns.html">Code patterns</a></li>
+                  <li><a href="faq.html">FAQ</a></li>
+                  <li><a href="https://issues.apache.org/jira/browse/SIS">Issue Tracker</a></li>
+                </ul>
+              </li>
+              <li class="dropdown"> <a class="dropdown-toggle" data-toggle="dropdown">ASF <b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                  <li><a href="http://www.apache.org">The Foundation</a></li>
+                  <li><a href="http://www.apache.org/foundation/thanks.html">Thanks</a></li>
+                  <li><a href="http://www.apache.org/foundation/sponsorship.html">Become a Sponsor</a></li>
+                  <li><a href="http://www.apache.org/security/">Security</a></li>
+                </ul>
+              </li>
+            </ul>
+          </div> <!-- /.nav-collapse -->
+        </div><!-- /.container -->
+      </div><!-- /.navbar-inner -->
+    </div>
+
+    <div class="container-fluid">
+      <div class="row-fluid">
+        <div class="span2">
+          <img src="img/logo.png"/>
+          <div class="well sidebar-nav">
+            <ul class="nav nav-list">
+              <li class="active"><a href="index.html">Home</a></li>
+              <li><a href="mail-lists.html">Mailing Lists</a></li>
+              <li><a href="license.html">Project License</a></li>
+              <li><a href="team-list.html">Project Team</a></li>
+              <li class="nav-header">Project Documentation</li>
+              <li><a href="book/en/developer-guide.html">Developer guide</a></li>
+              <li><a href="apidocs/index.html">Online Javadoc</a></li>
+              <li><a href="downloads.html">Downloads</a></li>
+              <li><a href="source.html">Source Code</a></li>
+              <li><a href="code-patterns.html">Code patterns</a></li>
+              <li><a href="faq.html">FAQ</a></li>
+              <li><a href="https://issues.apache.org/jira/browse/SIS">Issue Tracker</a></li>
+              <li class="nav-header">ASF</li>
+              <li><a href="http://www.apache.org">The Foundation</a></li>
+              <li><a href="http://www.apache.org/foundation/thanks.html">Thanks</a></li>
+              <li><a href="http://www.apache.org/foundation/sponsorship.html">Become a Sponsor</a></li>
+              <li><a href="http://www.apache.org/security/">Security</a></li>
+            </ul>
+          </div><!--/.well -->
+        </div><!--/span-->
+        <div class="span10">
+          <section id="content" class="row">
+            <article class="span12">
+              <p class="page-title">{% block tagline %}{{ headers.title }}{% endblock %}</p>
+              {% block content %}{{ content|markdown }}{% endblock %}
+            </article>
+          </section>
+        </div><!--/span-->
+      </div><!--/row-fluid-->
+    </div><!--/container-fluid-->
+
+  <footer class="footer">
+    <div class="container">
+      <p>Copyright &copy; 2013-2015 The Apache Software Foundation, Licensed under the
+        <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a>.<br />
+          Apache SIS, Apache, the Apache feather logo are trademarks of The Apache Software Foundation.</p>
+    </div>
+  </footer>
+
+  <script src="js/jquery-1.9.1.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+
+</body>
+</html>

@@ -167,7 +167,8 @@ public class HybridRealm extends AppservRealm
     }
     
     @Override
-    public Enumeration getGroupNames(String username) throws InvalidOperationException, NoSuchUserException
+    @SuppressWarnings("unchecked")
+    public Enumeration<?> getGroupNames(String username) throws InvalidOperationException, NoSuchUserException
     {
         Vector<String> vector = this.cacheGroup.get(username);
         if (vector == null)
