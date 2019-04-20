@@ -105,7 +105,7 @@ public class LdapAdapter
     /** pairs from url and baseDn: acme.com.br ->  dc=acme,dc=com,dc=br */
     private Map<String, URI>             urlDc;
     
-    private boolean                      sslEnable;
+    //private boolean                      sslEnable;
     private String                       bruteAuth;
     private Map<String, Vector<String>>  cacheGroup;
     private LdapConnection               ldapConn;
@@ -119,7 +119,7 @@ public class LdapAdapter
     public LdapAdapter(Properties props) throws BadRealmException//, NoSuchRealmException
     {
         this.ldapConn = new LdapConnection();
-        this.sslEnable = false; // FIXME configure ssl
+        //this.sslEnable = false;
         this.urlDc = new HashMap<String, URI>();
         this.cacheGroup = new HashMap<String, Vector<String>>();
         setPropertyValue(PROP_DIRURL, "", props);
@@ -384,10 +384,10 @@ public class LdapAdapter
         }
     }
     
-    private boolean sslEnable()
-    {
-        return sslEnable;
-    }
+//    private boolean sslEnable()
+//    {
+//        return sslEnable;
+//    }
     
     /**
      * Get binding properties defined in server.xml for LDAP server.
