@@ -22,35 +22,34 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Random;
 
-import org.junit.Ignore;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+
+import org.apache.commons.codec.binary.Base64;
 import org.junit.Test;
 
-import net.sf.jkniv.jaas.Cipher;
-import net.sf.jkniv.jaas.MD5;
-import net.sf.jkniv.jaas.SHA256;
 import net.sf.jkniv.jaas.Hashing.HashingResult;
 
-public class SHA256CipherTest
+public class JWTCipherTest
 {
     @Test
-    public void whenEncodeSHA256Works() throws UnsupportedEncodingException
+    public void hmacSha256() throws Exception
     {
-        Cipher sha256 = new SHA256();
-        assertThat(sha256.encode("admin"), is("8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918"));
-    }
+        String secret = "secret";
+        String message = "Message";
         
-    @Test(expected = UnsupportedOperationException.class)
-    public void whenDeEncodeSHA256Works() throws UnsupportedEncodingException
-    {
-        Cipher sha256 = new SHA256();
-        sha256.decode("8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918");
+        Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
+        SecretKeySpec secret_key = new SecretKeySpec(secret.getBytes(), "HmacSHA256");
+        sha256_HMAC.init(secret_key);
+        
+        byte[] b = sha256_HMAC.doFinal(message.getBytes());
+        String hash = Base64.encodeBase64String(b);
+        System.out.println(hash);
+        System.out.println(new net.sf.jkniv.jaas.Base64().encode(b));
     }
+
     
-    @Test(expected = UnsupportedOperationException.class)
-    public void whenSHA256EncodeWithSaltIsUnsupported() throws UnsupportedEncodingException
-    {
-        Cipher sha256 = new SHA256();
-        sha256.encodeWithSalt("123456");
-    }
+    //eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
 }

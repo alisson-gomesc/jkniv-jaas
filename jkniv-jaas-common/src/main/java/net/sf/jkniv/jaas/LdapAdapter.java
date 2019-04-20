@@ -109,9 +109,17 @@ public class LdapAdapter
     private boolean                     sslEnable;
     private String                      bruteAuth;
     private Map<String, Vector<String>> cacheGroup;
+    private LdapConnection ldapConn;
+    
+    public LdapAdapter(Properties props, LdapConnection ldapConn) throws BadRealmException//, NoSuchRealmException
+    {
+        this(props);
+        this.ldapConn = ldapConn;
+    }
     
     public LdapAdapter(Properties props) throws BadRealmException//, NoSuchRealmException
     {
+        this.ldapConn = new LdapConnection();
         this.sslEnable = false; // FIXME configure ssl
         this.urlDc = new HashMap<String, String>();
         this.cacheGroup = new HashMap<String, Vector<String>>();
@@ -160,7 +168,7 @@ public class LdapAdapter
             env.put(Context.SECURITY_PRINCIPAL, userWithDomain);
             env.put(Context.SECURITY_CREDENTIALS, password);
             env.put(Context.PROVIDER_URL, getProviderUrl(userWithDomain));
-            ctx = new InitialDirContext(env);
+            ctx = this.ldapConn.getDirContext(env);
             auth = true;
         }
         catch (NamingException ex)
@@ -199,6 +207,7 @@ public class LdapAdapter
         return auth;
     }
     
+    
     public List<String> getGroupNames(final String username)
     {
         String userWithDomain = getUserWithDomain(username);
@@ -212,6 +221,7 @@ public class LdapAdapter
      * @param userWithDomain user name with a domain, ex: user@acme.com.br
      * @return return the list of group names
      */
+    @SuppressWarnings("rawtypes")
     private List<String> getGroupNames(DirContext ctx, String userWithDomain)
     {
         List<String> groups = Collections.emptyList();
