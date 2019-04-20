@@ -35,59 +35,6 @@ public class UrlLdapTest
 {
 
     @Test
-    public void whenParseOneDirectory() throws MalformedURLException
-    {
-        String url = "acme.com.br";
-        String[] directories = splitUrl(url);
-        assertThat(directories, notNullValue());
-        assertThat(directories.length, is(1));
-        assertThat(directories[0], is(url));
-        
-        String dc = domainComponent(url);
-        assertThat(dc, is("dc=acme,dc=com,dc=br"));
-    }
-    
-    @Test
-    public void whenParseOneDirectoryWithPort() throws MalformedURLException
-    {
-        String url = "acme.com.br:389";
-        String[] directories = splitUrl(url);
-        assertThat(directories, notNullValue());
-        assertThat(directories.length, is(1));
-        assertThat(directories[0], is(url));
-    }
-
-    @Test
-    public void whenParseTwoDirectories() throws MalformedURLException
-    {
-        String urls = "acme.com.br,company.com.br";
-        String[] directories = splitUrl(urls);
-        assertThat(directories, notNullValue());
-        assertThat(directories.length, is(2));
-        assertThat(directories[0], is("acme.com.br"));
-        assertThat(directories[1], is("company.com.br"));
-    }
-
-    @Test
-    public void whenParseTwoDirectoriesWithTrim() throws MalformedURLException
-    {
-        String urls = "acme.com.br , company.com.br ";
-        String[] directories = splitUrl(urls);
-        assertThat(directories, notNullValue());
-        assertThat(directories.length, is(2));
-        assertThat(directories[0], is("acme.com.br"));
-        assertThat(directories[1], is("company.com.br"));
-    }
-
-    @Test(expected=MalformedURLException.class)
-    public void whenParsePortError() throws MalformedURLException
-    {
-        String url = "acme.com.br:a89";
-        splitUrl(url);
-        Assert.fail();
-    }
-    
-    @Test
     public void whenRegexHasInterrogationSymbol()
     {
         String sql = "select group from table where name ?";
