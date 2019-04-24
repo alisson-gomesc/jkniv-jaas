@@ -76,13 +76,9 @@ public class LdapAdapter
     
     private static final String          PROP_BRUTE_AUTH              = "brute-auth";
     
-    private static final String          URL_LDAP                     = "ldap://";
-    private static final String          URL_LDAPS                    = "ldaps://";
     private static final String          DEFAULT_POOL_PROTOCOL        = "plain ssl";
     private static final String          SSL                          = "SSL";
     
-    private static final String          PORT_SSL                     = "636";
-    private static final String          PORT                         = "389";
     private static final LdapEntryParser LDAP_PARSER                  = new LdapEntryParser();
     // --------------------------------------------------------------------------------------------- //
     
@@ -118,8 +114,7 @@ public class LdapAdapter
     
     public LdapAdapter(Properties props) throws BadRealmException//, NoSuchRealmException
     {
-        this.ldapConn = new LdapConnection();
-        //this.sslEnable = false;
+        this.ldapConn = new LdapConnectionImpl();
         this.urlDc = new HashMap<String, URI>();
         this.cacheGroup = new HashMap<String, Vector<String>>();
         setPropertyValue(PROP_DIRURL, "", props);
@@ -168,7 +163,7 @@ public class LdapAdapter
             env.put(Context.SECURITY_PRINCIPAL, userWithDomain);
             env.put(Context.SECURITY_CREDENTIALS, password);
             env.put(Context.PROVIDER_URL, getProviderUrl(userWithDomain));
-            ctx = this.ldapConn.getDirContext(env);
+            ctx = this.ldapConn.openDir(env);
             auth = true;
         }
         catch (NamingException ex)

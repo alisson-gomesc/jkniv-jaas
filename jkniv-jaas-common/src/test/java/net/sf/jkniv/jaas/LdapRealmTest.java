@@ -57,7 +57,6 @@ public class LdapRealmTest
     private DirContext ctx;
     private NamingEnumeration answer;
     private NamingEnumeration ae;
-    //private SearchControls ctls;
     private SearchResult sr;
     private Attributes attrs;
     private Attribute attr;
@@ -66,7 +65,7 @@ public class LdapRealmTest
     @Before
     public void setUp() throws Exception 
     {
-        this.ldapConn = mock(LdapConnection.class);
+        this.ldapConn = mock(LdapConnectionMock.class);
         this.ctx = mock(DirContext.class);
         this.answer = mock(NamingEnumeration.class);
         this.sr = mock(SearchResult.class);
@@ -75,7 +74,7 @@ public class LdapRealmTest
         this.attr = mock(Attribute.class);
         this.eAttr = mock(NamingEnumeration.class);
 
-        given(ldapConn.getDirContext(any(Properties.class))).willReturn(this.ctx);
+        given(ldapConn.openDir(any(Properties.class))).willReturn(this.ctx);
         given(this.ctx.search(eq("dc=jkniv,dc=be"), eq("mail=algo@jkniv.be"), any(SearchControls.class)))
             .willReturn(this.answer);
         doNothing().when(this.ctx).close();

@@ -116,14 +116,22 @@ public class LdapEntryParserTest
     @Test
     public void whenSplitUris() throws MalformedURLException
     {
-        String urls = "ldap://mycompany.com:386,ldap://mycompany2.com,acme.com,another.com:386";
+        String urls = "ldap://mycompany.com:386,ldap://mycompany2.com,acme.com,another.com:386, ldaps://mycompany.com:6360, ldaps://mycompany.com";
         URI[] directories = parser.splitUri(urls);
         assertThat(directories, notNullValue());
-        assertThat(directories.length, is(4));
+        assertThat(directories.length, is(6));
         assertThat(directories[0].toString(), is("ldap://mycompany.com:386"));
-        assertThat(directories[1].toString(), is("ldap://mycompany2.com"));
-        assertThat(directories[2].toString(), is("ldap://acme.com"));
+        assertThat(directories[0].getPort(), is(386));
+        assertThat(directories[1].toString(), is("ldap://mycompany2.com:389"));
+        assertThat(directories[1].getPort(), is(389));
+        assertThat(directories[2].toString(), is("ldap://acme.com:389"));
+        assertThat(directories[2].getPort(), is(389));
         assertThat(directories[3].toString(), is("ldap://another.com:386"));
+        assertThat(directories[3].getPort(), is(386));
+        assertThat(directories[4].toString(), is("ldaps://mycompany.com:6360"));
+        assertThat(directories[4].getPort(), is(6360));
+        assertThat(directories[5].toString(), is("ldaps://mycompany.com:636"));
+        assertThat(directories[5].getPort(), is(636));
     }
     
 

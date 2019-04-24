@@ -8,8 +8,11 @@ import java.util.logging.Level;
 
 class LdapEntryParser
 {
-    
-    
+    private static final String          URL_LDAP                     = "ldap://";
+    private static final String          URL_LDAPS                    = "ldaps://";
+    private static final String          PORT_SSL                     = "636";
+    private static final String          PORT                         = "389";
+        
     /**
      * Build a Domain Component (DC) from domain url.
      * @param url like gmail.com
@@ -78,10 +81,19 @@ class LdapEntryParser
         {
             try
             {
-                if (uris[i].startsWith("ldap://") || uris[i].startsWith("ldaps://"))                    
-                    directories[i] = new URI(uris[i]);
+                String uri = uris[i].trim();
+                if (uri.startsWith(URL_LDAP) || uri.startsWith(URL_LDAPS))
+                    directories[i] = new URI(uri);
                 else
-                    directories[i] = new URI("ldap://"+uris[i]);
+                    directories[i] = new URI(URL_LDAP+uri);
+                
+                if (directories[i].getPort() == -1)
+                {
+                    if (directories[i].getScheme().equals("ldap"))
+                        directories[i] = new URI(directories[i].toString()+":"+ PORT);
+                    else
+                        directories[i] = new URI(directories[i].toString()+":"+ PORT_SSL);
+                }
             }
             catch (URISyntaxException e)
             {
