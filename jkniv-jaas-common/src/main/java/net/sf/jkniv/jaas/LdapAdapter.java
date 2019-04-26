@@ -101,20 +101,18 @@ public class LdapAdapter
     /** pairs from url and baseDn: acme.com.br ->  dc=acme,dc=com,dc=br */
     private Map<String, URI>             urlDc;
     
-    //private boolean                      sslEnable;
     private String                       bruteAuth;
     private Map<String, Vector<String>>  cacheGroup;
     private LdapConnection               ldapConn;
     
-    public LdapAdapter(Properties props, LdapConnection ldapConn) throws BadRealmException//, NoSuchRealmException
-    {
-        this(props);
-        this.ldapConn = ldapConn;
-    }
-    
     public LdapAdapter(Properties props) throws BadRealmException//, NoSuchRealmException
     {
-        this.ldapConn = new LdapConnectionImpl();
+        this(props, new LdapConnectionImpl());
+    }
+    
+    public LdapAdapter(Properties props, LdapConnection ldapConn) throws BadRealmException//, NoSuchRealmException
+    {
+        this.ldapConn = ldapConn;
         this.urlDc = new HashMap<String, URI>();
         this.cacheGroup = new HashMap<String, Vector<String>>();
         setPropertyValue(PROP_DIRURL, "", props);
@@ -129,7 +127,6 @@ public class LdapAdapter
         settingLdapProperties(props);
         // using search filters
         String filter = props.getProperty(PROP_SEARCH_FILTER);
-        
         if (filter == null)
             filter = DEFAULT_SEARCH_FILTER;
         else
@@ -156,7 +153,6 @@ public class LdapAdapter
             LOG.log(Level.WARNING, I18nManager.getString("hybrid.ldap.forcelogin", userWithDomain));
             return true;
         }
-        
         try
         {
             Properties env = getLdapBindProps();
@@ -378,11 +374,6 @@ public class LdapAdapter
             }
         }
     }
-    
-//    private boolean sslEnable()
-//    {
-//        return sslEnable;
-//    }
     
     /**
      * Get binding properties defined in server.xml for LDAP server.

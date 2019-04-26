@@ -20,8 +20,10 @@ package net.sf.jkniv.jaas;
 
 import java.util.Properties;
 
+import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.directory.DirContext;
+import javax.naming.directory.InitialDirContext;
 
 /**
  * Represent a connection with LDAP with search capability.
@@ -29,10 +31,21 @@ import javax.naming.directory.DirContext;
  * @author Alisson Gomes
  *
  */
-class LdapConnectionMock implements LdapConnection
+class LdapConnMockProvideUrl implements LdapConnection
 {
     public DirContext openDir(Properties env) throws NamingException
     {
+        String validate = env.getProperty("validate", "");
+        if ("yes".equalsIgnoreCase(validate))
+            return new InitialDirContext(env);
+        
+        checkProvideUrl(env);
         return null;
-    }    
+    }
+    
+    private void checkProvideUrl(Properties env)
+    {
+        String provideUrl = env.getProperty(Context.PROVIDER_URL, "");
+    }
+    
 }

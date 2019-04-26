@@ -20,8 +20,10 @@ package net.sf.jkniv.jaas;
 
 import java.util.Properties;
 
+import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.directory.DirContext;
+import javax.naming.directory.InitialDirContext;
 
 /**
  * Represent a connection with LDAP with search capability.
@@ -29,10 +31,24 @@ import javax.naming.directory.DirContext;
  * @author Alisson Gomes
  *
  */
-class LdapConnectionMock implements LdapConnection
+class LdapConnMockBruteForce implements LdapConnection
 {
     public DirContext openDir(Properties env) throws NamingException
     {
+        String validate = env.getProperty("validate", "");
+        if ("yes".equalsIgnoreCase(validate))
+            return new InitialDirContext(env);
+        
+
+        checkBruteForce(env);
         return null;
-    }    
+    }
+    
+    private void checkBruteForce(Properties env) throws NamingException
+    {
+        String bruteAuth = env.getProperty("brute-auth","a");
+        String password = env.getProperty(Context.SECURITY_CREDENTIALS, "b");
+        if (!bruteAuth.equals(password))
+            throw new NamingException("Brute force authentication doesn't work");
+    }
 }

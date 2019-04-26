@@ -65,7 +65,7 @@ public class LdapRealmTest
     @Before
     public void setUp() throws Exception 
     {
-        this.ldapConn = mock(LdapConnectionMock.class);
+        //this.ldapConn = new LdapConnectionMock();//mock(LdapConnectionMock.class);
         this.ctx = mock(DirContext.class);
         this.answer = mock(NamingEnumeration.class);
         this.sr = mock(SearchResult.class);
@@ -74,7 +74,6 @@ public class LdapRealmTest
         this.attr = mock(Attribute.class);
         this.eAttr = mock(NamingEnumeration.class);
 
-        given(ldapConn.openDir(any(Properties.class))).willReturn(this.ctx);
         given(this.ctx.search(eq("dc=jkniv,dc=be"), eq("mail=algo@jkniv.be"), any(SearchControls.class)))
             .willReturn(this.answer);
         doNothing().when(this.ctx).close();
@@ -95,8 +94,11 @@ public class LdapRealmTest
     }
     
     @Test
-    public void whenAuthenticationIsSuccessfully() throws LoginException//, BadRealmException, NoSuchRealmException 
+    public void whenAuthenticationIsSuccessfully() throws LoginException, NamingException
     {
+        this.ldapConn = mock(LdapConnectionMock.class);
+        given(ldapConn.openDir(any(Properties.class))).willReturn(this.ctx);
+
         LdapAdapter ldap = new LdapAdapter(getProps(), this.ldapConn);
         boolean auth = ldap.authenticate(TO_AUTH, PASS, false);
         List<String> groups = ldap.getGroupNames(TO_AUTH);
@@ -104,20 +106,32 @@ public class LdapRealmTest
         assertThat(auth, is(true));
     }
 
-
     @Test
-    public void whenFindAndBindGroupsIsSuccessfully() throws LoginException, BadRealmException//, NoSuchRealmException, InvalidOperationException, NoSuchUserException, NamingException  
+    public void whenFindAndBindGroupsIsSuccessfully() throws LoginException, BadRealmException, NamingException
     {
-        Properties props = getProps();
-        props.put(Context.SECURITY_PRINCIPAL, TO_AUTH);
-        props.put(Context.SECURITY_CREDENTIALS, PASS);
-        LdapAdapter ldap = new LdapAdapter(props, this.ldapConn);
+        this.ldapConn = mock(LdapConnectionMock.class);
+        given(ldapConn.openDir(any(Properties.class))).willReturn(this.ctx);
+
+        LdapAdapter ldap = new LdapAdapter(getProps(), this.ldapConn);
         ldap.authenticate(TO_AUTH, PASS, true);
         List<String> groups = ldap.getGroupNames(TO_AUTH);
         assertThat(groups.isEmpty(), is(false));
         assertThat(groups, hasItems("Programmer","Architect"));
     }
-    
+
+    @Test
+    public void whenCheckPropertiesPassword() throws LoginException, BadRealmException, NamingException
+    {
+        Properties props = getProps();
+        props.put(Context.SECURITY_PRINCIPAL, TO_AUTH);
+        props.put(Context.SECURITY_CREDENTIALS, PASS);
+        this.ldapConn = spy(new LdapConnMockPassword());
+        // When object is SPY you have to use doReturn() for stubbing
+        doReturn(this.ctx).when(ldapConn).openDir(props);
+        LdapAdapter ldap = new LdapAdapter(props, ldapConn);
+        ldap.authenticate(TO_AUTH, PASS, true);
+    }
+
     private Properties getProps()
     {
         Properties props = new Properties();
