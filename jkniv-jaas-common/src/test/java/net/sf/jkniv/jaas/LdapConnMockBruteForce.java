@@ -33,15 +33,15 @@ import javax.naming.directory.InitialDirContext;
  */
 class LdapConnMockBruteForce implements LdapConnection
 {
+    private DirContext dirCtx;
+    public LdapConnMockBruteForce(DirContext dirCtx)
+    {
+        this.dirCtx = dirCtx;
+    }
     public DirContext openDir(Properties env) throws NamingException
     {
-        String validate = env.getProperty("validate", "");
-        if ("yes".equalsIgnoreCase(validate))
-            return new InitialDirContext(env);
-        
-
         checkBruteForce(env);
-        return null;
+        return dirCtx;
     }
     
     private void checkBruteForce(Properties env) throws NamingException

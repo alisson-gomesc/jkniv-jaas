@@ -125,12 +125,84 @@ public class LdapRealmTest
         Properties props = getProps();
         props.put(Context.SECURITY_PRINCIPAL, TO_AUTH);
         props.put(Context.SECURITY_CREDENTIALS, PASS);
-        this.ldapConn = spy(new LdapConnMockPassword());
+        this.ldapConn = spy(new LdapConnMockPassword(this.ctx));
         // When object is SPY you have to use doReturn() for stubbing
-        doReturn(this.ctx).when(ldapConn).openDir(props);
+        //doReturn(this.ctx).when(ldapConn).openDir(props);
         LdapAdapter ldap = new LdapAdapter(props, ldapConn);
         ldap.authenticate(TO_AUTH, PASS, true);
+        List<String> groups = ldap.getGroupNames(TO_AUTH);
+        assertThat(groups.isEmpty(), is(false));
+        assertThat(groups, hasItems("Programmer","Architect"));
     }
+
+    @Test
+    public void whenCheckPropertiesBruteAuth() throws LoginException, BadRealmException, NamingException
+    {
+        Properties props = getProps();
+        props.put(Context.SECURITY_PRINCIPAL, TO_AUTH);
+        props.put(Context.SECURITY_CREDENTIALS, PASS);
+        props.put("brute-auth", "c");
+        this.ldapConn = spy(new LdapConnMockBruteForce(this.ctx));
+        LdapAdapter ldap = new LdapAdapter(props, ldapConn);
+        ldap.authenticate("john@jkniv.be", "c", true);
+        List<String> groups = ldap.getGroupNames(TO_AUTH);
+        assertThat("LDAP Brute force don't fetch groups", groups.isEmpty(), is(true));
+    }
+
+    @Test
+    public void whenCheckDefaultDomain() throws LoginException, BadRealmException, NamingException
+    {
+        given(this.ctx.search(eq("dc=jkniv,dc=io"), eq("mail=algo@jkniv.io"), any(SearchControls.class)))
+        .willReturn(this.answer);
+
+        Properties props = getProps();
+        props.put(LdapAdapter.PROP_DIRURL, "jkniv.be,jkniv.io");
+        props.put(LdapAdapter.PROP_DEFAULT_DOMAIN, "jkniv.io");
+        this.ldapConn = spy(new LdapConnMockPassword(this.ctx));
+        LdapAdapter ldap = new LdapAdapter(props, ldapConn);
+        ldap.authenticate("algo", "ultra-secret", true);
+        List<String> groups = ldap.getGroupNames("algo@jkniv.io");
+        assertThat(groups.isEmpty(), is(false));
+        assertThat(groups, hasItems("Programmer","Architect"));
+    }
+    
+    @Test
+    public void whenCheckRequisiteDomainWithDefault() throws LoginException, BadRealmException, NamingException
+    {
+        given(this.ctx.search(eq("dc=jkniv,dc=io"), eq("mail=algo@jkniv.io"), any(SearchControls.class)))
+        .willReturn(this.answer);
+
+        Properties props = getProps();
+        props.put(LdapAdapter.PROP_DIRURL, "jkniv.be,jkniv.io,acme.io");
+        props.put(LdapAdapter.PROP_REQDIRURL, "acme.io");
+        props.put(LdapAdapter.PROP_DEFAULT_DOMAIN, "acme.io");
+        this.ldapConn = spy(new LdapConnMockPassword(this.ctx));
+        LdapAdapter ldap = new LdapAdapter(props, ldapConn);
+        
+        assertThat(ldap.isRequisite("john@jkniv.be"), is(false));
+        assertThat(ldap.isRequisite("john@acme.io"), is(true));
+        assertThat(ldap.isRequisite("john"), is(true));
+        assertThat(ldap.isRequisite("algo@jkniv.io"), is(false));
+        assertThat(ldap.isRequisite("algo"), is(true));
+    }
+
+    @Test
+    public void whenCheckRequisiteDomain() throws LoginException, BadRealmException, NamingException
+    {
+        given(this.ctx.search(eq("dc=jkniv,dc=io"), eq("mail=algo@jkniv.io"), any(SearchControls.class)))
+        .willReturn(this.answer);
+
+        Properties props = getProps();
+        props.put(LdapAdapter.PROP_DIRURL, "jkniv.be,jkniv.io,acme.io");
+        props.put(LdapAdapter.PROP_REQDIRURL, "acme.io");
+        this.ldapConn = spy(new LdapConnMockPassword(this.ctx));
+        LdapAdapter ldap = new LdapAdapter(props, ldapConn);
+        
+        assertThat(ldap.isRequisite("john@jkniv.be"), is(false));
+        assertThat(ldap.isRequisite("john@acme.io"), is(true));
+    }
+
+
 
     private Properties getProps()
     {

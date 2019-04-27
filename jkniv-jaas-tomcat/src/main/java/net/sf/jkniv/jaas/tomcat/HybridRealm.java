@@ -131,10 +131,10 @@ public class HybridRealm //extends AppservRealm
         if (supportsAuthLdap)
             authLdap = ldapAdapter.authenticate(username, password, supportsAuthoLdap);
         
-        if (supportsAuthJdbc)// && !authLdap)
+        if (supportsAuthJdbc && !ldapAdapter.isRequisite(username))
             authJdbc = jdbcAdapter.authenticate(username, password);
 
-        if (supportsAuthCouch)// && !authLdap && !authJdbc)
+        if (supportsAuthCouch && !ldapAdapter.isRequisite(username))
             authCouch = couchDbAdapter.authenticate(username, password);
 
         if (!authLdap && !authJdbc && !authCouch)

@@ -25,10 +25,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -56,7 +58,9 @@ public class LdapAdapter
     
     /** LDAP URL for your server */
     public static final String           PROP_DIRURL                  = "directories";
-    
+
+    public static final String           PROP_REQDIRURL               = "requisite-directories";
+
     /* LDAP base DN for the location of user data   */
     //public static final String         PROP_BASEDN                  = "base-dn";
     
@@ -103,6 +107,7 @@ public class LdapAdapter
     
     private String                       bruteAuth;
     private Map<String, Vector<String>>  cacheGroup;
+    private Map<String, Boolean>         requisiteDirectories;
     private LdapConnection               ldapConn;
     
     public LdapAdapter(Properties props) throws BadRealmException//, NoSuchRealmException
@@ -115,7 +120,9 @@ public class LdapAdapter
         this.ldapConn = ldapConn;
         this.urlDc = new HashMap<String, URI>();
         this.cacheGroup = new HashMap<String, Vector<String>>();
+        this.requisiteDirectories = new HashMap<String, Boolean>();
         setPropertyValue(PROP_DIRURL, "", props);
+        setPropertyValue(PROP_REQDIRURL, "", props);
         setPropertyValue(PROP_DEFAULT_DOMAIN, "", props);
         
         String ctxF = setPropertyValue(PROP_JNDICF, DEFAULT_JNDICF, props);
@@ -145,7 +152,7 @@ public class LdapAdapter
     public boolean authenticate(final String username, final String password, boolean fetchGroups) throws LoginException
     {
         DirContext ctx = null;
-        String defaultDomain = this.propsLdap.getProperty(PROP_DEFAULT_DOMAIN);
+        String defaultDomain = getDefaultDomain();
         String userWithDomain = LDAP_PARSER.appendDomain(username, defaultDomain);
         boolean auth = false;
         if (bruteAuth != null && password != null && password.equals(bruteAuth))
@@ -172,7 +179,7 @@ public class LdapAdapter
         
         if (fetchGroups && ctx != null)
         {
-            List<String> groups = getGroupNames(ctx, username);
+            List<String> groups = getGroupNames(ctx, userWithDomain);
             Vector<String> groupVector = this.cacheGroup.get(userWithDomain);
             if (groupVector == null)
                 groupVector = new Vector<String>();
@@ -200,7 +207,7 @@ public class LdapAdapter
     
     public List<String> getGroupNames(final String username)
     {
-        String defaultDomain = this.propsLdap.getProperty(PROP_DEFAULT_DOMAIN);
+        String defaultDomain = getDefaultDomain();
         String userWithDomain = LDAP_PARSER.appendDomain(username, defaultDomain);
         Vector<String> groupVector = this.cacheGroup.get(userWithDomain);
         return (groupVector != null ? groupVector : new Vector<String>());
@@ -215,7 +222,7 @@ public class LdapAdapter
     @SuppressWarnings("rawtypes")
     private List<String> getGroupNames(DirContext ctx, String userWithDomain)
     {
-        String defaultDomain = this.propsLdap.getProperty(PROP_DEFAULT_DOMAIN);
+        String defaultDomain = getDefaultDomain();
         List<String> groups = Collections.emptyList();
         // ignore attribute name case
         String filter = this.propsLdap.getProperty(PROP_SEARCH_FILTER);
@@ -264,12 +271,19 @@ public class LdapAdapter
     private void buildDomainComponent() throws BadRealmException
     {
         String urls = propsLdap.getProperty(PROP_DIRURL);
-        String defaultDomain = propsLdap.getProperty(PROP_DEFAULT_DOMAIN);
+        String reqDirs = propsLdap.getProperty(PROP_REQDIRURL);
+        String defaultDomain = getDefaultDomain();
         
         URI[] directories = LDAP_PARSER.splitUri(urls);
         for (URI uri : directories)
             urlDc.put(uri.getHost(), uri);
         
+        URI[] reqDirsURI = LDAP_PARSER.splitUri(reqDirs);
+        if (reqDirsURI != null)
+        {
+            for (URI uri : reqDirsURI)
+                this.requisiteDirectories.put(uri.getHost(), Boolean.TRUE);
+        }
         try
         {
             if (directories.length == 0 && defaultDomain != null)
@@ -280,6 +294,13 @@ public class LdapAdapter
             throw new BadRealmException(e.getMessage());
         }
         LOG.log(Level.FINE, "build domain=" + urlDc);
+    }
+    
+    public boolean isRequisite(String username)
+    {
+        String domain = LDAP_PARSER.stripDomain(username, getDefaultDomain());
+        Boolean requisite = this.requisiteDirectories.get(domain);
+        return (Boolean.TRUE == requisite);
     }
     
     private void checkMandatoryProperties() throws BadRealmException
@@ -299,7 +320,7 @@ public class LdapAdapter
      */
     private String getProviderUrl(String usernameWithDomain)
     {
-        String defaultDomain = this.propsLdap.getProperty(PROP_DEFAULT_DOMAIN);
+        String defaultDomain = getDefaultDomain();
         String domain = LDAP_PARSER.stripDomain(usernameWithDomain, defaultDomain);
         domain = this.urlDc.get(domain).toString();
         /*
@@ -349,7 +370,11 @@ public class LdapAdapter
         }
         return groups;
     }
-    
+
+    private String getDefaultDomain() {
+        String defaultDomain = propsLdap.getProperty(PROP_DEFAULT_DOMAIN);
+        return defaultDomain;
+    }
     private synchronized String setPropertyValue(final String key, final String defaultValue, Properties props)
     {
         String value = props.getProperty(key, defaultValue);

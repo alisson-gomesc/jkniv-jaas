@@ -72,7 +72,7 @@ class LdapEntryParser
      */
     public URI[] splitUri(String urls) throws BadRealmException
     {
-        if (urls == null)
+        if (urls == null || "".equals(urls))
             return new URI[0];
         
         String[] uris = urls.split(",");

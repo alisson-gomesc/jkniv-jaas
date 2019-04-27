@@ -18,6 +18,8 @@
  */
 package net.sf.jkniv.jaas;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.naming.Context;
@@ -33,23 +35,29 @@ import javax.naming.directory.InitialDirContext;
  */
 class LdapConnMockPassword implements LdapConnection
 {
+    private DirContext dirCtx;
+    private final Map<String, String> USERS = new HashMap<String, String>();
+    
+    public LdapConnMockPassword(DirContext dirCtx)
+    {
+        this.dirCtx = dirCtx;
+        USERS.put("algo@jkniv.be", "secret");
+        USERS.put("algo@jkniv.io", "ultra-secret");
+    }
     public DirContext openDir(Properties env) throws NamingException
     {
-        String validate = env.getProperty("validate", "");
-        if ("yes".equalsIgnoreCase(validate))
-            return new InitialDirContext(env);
-        
         checkUserPassword(env);
-        return null;
+        return dirCtx;
     }
     
     private void checkUserPassword(Properties env) throws NamingException
     {
         String userWithDomain = env.getProperty(Context.SECURITY_PRINCIPAL, "");
         String password = env.getProperty(Context.SECURITY_CREDENTIALS, "");
-        if (!"algo@jkniv.be".equals(userWithDomain))
+        String passReal = USERS.get(userWithDomain);
+        if (passReal == null)
             throw new NamingException("User [" + userWithDomain + "] doesn't belong this domain");
-        if (!"secret".equals(password))
+        if (!passReal.equals(password))
             throw new NamingException("Password [" + password + "] from user [" + userWithDomain + "] doesn't match!");
     }
 }

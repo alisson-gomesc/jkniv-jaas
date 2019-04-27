@@ -77,7 +77,6 @@ public class HybridRealm //extends AppservRealm
         this.cacheGroup = new HashMap<String, Vector>();
         this.emptyVector = new Vector<String>();
         this.props = props;
-        System.out.println("new JdbcAdapter...");
         this.jdbcAdapter = new JdbcAdapter(props);
         this.ldapAdapter = new LdapAdapter(props);
         this.couchDbAdapter = new CouchDbAdapter(props);
@@ -109,14 +108,13 @@ public class HybridRealm //extends AppservRealm
         boolean authLdap = false;
         boolean authJdbc = false;
         boolean authCouch = false;
-        
-        //        LOG.log(Level.FINEST,"LEVEL FINEST");
-        //        LOG.log(Level.FINER,"LEVEL FINER");
-        //        LOG.log(Level.FINE,"LEVEL FINE");
-        //        LOG.log(Level.INFO,"LEVEL INFO");
-        //        LOG.log(Level.CONFIG,"LEVEL CONFIG");
-        //        LOG.log(Level.WARNING,"LEVEL WARNING");
-        //        LOG.log(Level.SEVERE,"LEVEL SEVERE");
+        //LOG.log(Level.FINEST,"LEVEL FINEST");
+        //LOG.log(Level.FINER,"LEVEL FINER");
+        //LOG.log(Level.FINE,"LEVEL FINE");
+        //LOG.log(Level.INFO,"LEVEL INFO");
+        //LOG.log(Level.CONFIG,"LEVEL CONFIG");
+        //LOG.log(Level.WARNING,"LEVEL WARNING");
+        //LOG.log(Level.SEVERE,"LEVEL SEVERE");
         
         LOG.info(
                 I18nManager.getString("hybrid.realm.infoauth", 
@@ -137,10 +135,10 @@ public class HybridRealm //extends AppservRealm
         if (supportsAuthLdap)
             authLdap = ldapAdapter.authenticate(username, password, supportsAuthoLdap);
         
-        if (supportsAuthJdbc)// && !authLdap)
+        if (supportsAuthJdbc && !ldapAdapter.isRequisite(username))
             authJdbc = jdbcAdapter.authenticate(username, password);
         
-        if (supportsAuthCouch)// && !authLdap && !authJdbc)
+        if (supportsAuthCouch && !ldapAdapter.isRequisite(username))
             authCouch = couchDbAdapter.authenticate(username, password);
         
         if (!authLdap && !authJdbc && !authCouch)
