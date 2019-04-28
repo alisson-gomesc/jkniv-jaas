@@ -179,11 +179,11 @@ public class LdapRealmTest
         this.ldapConn = spy(new LdapConnMockPassword(this.ctx));
         LdapAdapter ldap = new LdapAdapter(props, ldapConn);
         
-        assertThat(ldap.isRequisite("john@jkniv.be"), is(false));
-        assertThat(ldap.isRequisite("john@acme.io"), is(true));
-        assertThat(ldap.isRequisite("john"), is(true));
-        assertThat(ldap.isRequisite("algo@jkniv.io"), is(false));
-        assertThat(ldap.isRequisite("algo"), is(true));
+        assertThat(ldap.isMandatory("john@jkniv.be"), is(false));
+        assertThat(ldap.isMandatory("john@acme.io"), is(true));
+        assertThat(ldap.isMandatory("john"), is(true));
+        assertThat(ldap.isMandatory("algo@jkniv.io"), is(false));
+        assertThat(ldap.isMandatory("algo"), is(true));
     }
 
     @Test
@@ -198,8 +198,8 @@ public class LdapRealmTest
         this.ldapConn = spy(new LdapConnMockPassword(this.ctx));
         LdapAdapter ldap = new LdapAdapter(props, ldapConn);
         
-        assertThat(ldap.isRequisite("john@jkniv.be"), is(false));
-        assertThat(ldap.isRequisite("john@acme.io"), is(true));
+        assertThat(ldap.isMandatory("john@jkniv.be"), is(false));
+        assertThat(ldap.isMandatory("john@acme.io"), is(true));
     }
 
 

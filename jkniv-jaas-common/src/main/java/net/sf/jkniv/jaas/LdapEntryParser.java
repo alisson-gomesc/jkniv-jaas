@@ -4,7 +4,9 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.logging.Level;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 class LdapEntryParser
 {
@@ -70,30 +72,43 @@ class LdapEntryParser
      * @return array of URLs
      * @throws BadRealmException when an URL is malformed
      */
-    public URI[] splitUri(String urls) throws BadRealmException
+    public Map<String,URI> splitUri(String urls) throws BadRealmException
     {
         if (urls == null || "".equals(urls))
-            return new URI[0];
+            return Collections.emptyMap();
         
         String[] uris = urls.split(",");
-        URI[] directories = new URI[uris.length];
-        for (int i = 0; i < directories.length; i++)
+        Map<String,URI> directories = new HashMap<String, URI>();
+        for (int i = 0; i < uris.length; i++)
         {
             try
             {
-                String uri = uris[i].trim();
-                if (uri.startsWith(URL_LDAP) || uri.startsWith(URL_LDAPS))
-                    directories[i] = new URI(uri);
-                else
-                    directories[i] = new URI(URL_LDAP+uri);
-                
-                if (directories[i].getPort() == -1)
+                String entry = uris[i].trim();
+                String host = null;
+                int equalIndex = entry.indexOf("=");
+                if (equalIndex >= 0)
                 {
-                    if (directories[i].getScheme().equals("ldap"))
-                        directories[i] = new URI(directories[i].toString()+":"+ PORT);
-                    else
-                        directories[i] = new URI(directories[i].toString()+":"+ PORT_SSL);
+                    host = entry.substring(0,equalIndex);
+                    entry = entry.substring(equalIndex+1, entry.length());
                 }
+                    
+                URI uri = null;
+                if (entry.startsWith(URL_LDAP) || entry.startsWith(URL_LDAPS))
+                    uri = new URI(entry);
+                else 
+                    uri = new URI(URL_LDAP+entry);
+
+                
+                if (uri.getPort() == -1)
+                {
+                    if (uri.getScheme().equals("ldap"))
+                        uri = new URI(uri.toString()+":"+ PORT);
+                    else
+                        uri = new URI(uri.toString()+":"+ PORT_SSL);
+                }
+                if (host == null)
+                    host = uri.getHost();
+                directories.put(host, uri);
             }
             catch (URISyntaxException e)
             {

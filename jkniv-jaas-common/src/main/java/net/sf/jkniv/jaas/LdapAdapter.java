@@ -107,7 +107,7 @@ public class LdapAdapter
     
     private String                       bruteAuth;
     private Map<String, Vector<String>>  cacheGroup;
-    private Map<String, Boolean>         requisiteDirectories;
+    private Map<String, URI>         mandatoriesDirectories;
     private LdapConnection               ldapConn;
     
     public LdapAdapter(Properties props) throws BadRealmException//, NoSuchRealmException
@@ -120,7 +120,7 @@ public class LdapAdapter
         this.ldapConn = ldapConn;
         this.urlDc = new HashMap<String, URI>();
         this.cacheGroup = new HashMap<String, Vector<String>>();
-        this.requisiteDirectories = new HashMap<String, Boolean>();
+        this.mandatoriesDirectories = new HashMap<String, URI>();
         setPropertyValue(PROP_DIRURL, "", props);
         setPropertyValue(PROP_REQDIRURL, "", props);
         setPropertyValue(PROP_DEFAULT_DOMAIN, "", props);
@@ -274,19 +274,19 @@ public class LdapAdapter
         String reqDirs = propsLdap.getProperty(PROP_REQDIRURL);
         String defaultDomain = getDefaultDomain();
         
-        URI[] directories = LDAP_PARSER.splitUri(urls);
-        for (URI uri : directories)
-            urlDc.put(uri.getHost(), uri);
+        urlDc = LDAP_PARSER.splitUri(urls);
+        //for (URI uri : directories)
+        //    urlDc.put(uri.getHost(), uri);
         
-        URI[] reqDirsURI = LDAP_PARSER.splitUri(reqDirs);
-        if (reqDirsURI != null)
-        {
-            for (URI uri : reqDirsURI)
-                this.requisiteDirectories.put(uri.getHost(), Boolean.TRUE);
-        }
+        this.mandatoriesDirectories = LDAP_PARSER.splitUri(reqDirs);
+//        if (reqDirsURI != null)
+//        {
+//            for (URI uri : reqDirsURI)
+//                this.requisiteDirectories.put(uri.getHost(), Boolean.TRUE);
+//        }
         try
         {
-            if (directories.length == 0 && defaultDomain != null)
+            if (urlDc.isEmpty() && defaultDomain != null)
                 urlDc.put(defaultDomain, new URI("ldap://" + defaultDomain));
         }
         catch (URISyntaxException e)
@@ -296,11 +296,11 @@ public class LdapAdapter
         LOG.log(Level.FINE, "build domain=" + urlDc);
     }
     
-    public boolean isRequisite(String username)
+    public boolean isMandatory(String username)
     {
         String domain = LDAP_PARSER.stripDomain(username, getDefaultDomain());
-        Boolean requisite = this.requisiteDirectories.get(domain);
-        return (Boolean.TRUE == requisite);
+        URI mandatory = this.mandatoriesDirectories.get(domain);
+        return (mandatory != null);
     }
     
     private void checkMandatoryProperties() throws BadRealmException

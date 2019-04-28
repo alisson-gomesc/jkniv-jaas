@@ -131,17 +131,18 @@ public class HybridRealm //extends AppservRealm
         
 //        if (!supportsAuthJdbc && !supportsAuthLdap)
 //            throw new LoginException(I18nManager.getString("hybrid.realm.withoutauth"));
-        
+        boolean ldapMandatory = ldapAdapter.isMandatory(username);
         if (supportsAuthLdap)
             authLdap = ldapAdapter.authenticate(username, password, supportsAuthoLdap);
         
-        if (supportsAuthJdbc && !ldapAdapter.isRequisite(username))
+        if (supportsAuthJdbc && !ldapMandatory)
             authJdbc = jdbcAdapter.authenticate(username, password);
         
-        if (supportsAuthCouch && !ldapAdapter.isRequisite(username))
+        if (supportsAuthCouch && ldapMandatory)
             authCouch = couchDbAdapter.authenticate(username, password);
         
-        if (!authLdap && !authJdbc && !authCouch)
+        if((supportsAuthoLdap && !authLdap && ldapMandatory)
+                || (!authLdap && !authJdbc && !authCouch))
         {
             jdbcAdapter.logForFailed(username);
             throw new LoginException(I18nManager.getString("hybrid.realm.loginfail", username));
