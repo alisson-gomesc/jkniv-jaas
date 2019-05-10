@@ -172,6 +172,7 @@ public class CouchDbAdapter
         HttpResponse httpResponse = null;
         String response = null;
         String cookie = conn.getCookieSession();
+        String[] roles = new String[0];
         if (conn.isExpired())
         {
             try
@@ -188,14 +189,15 @@ public class CouchDbAdapter
             httpResponse = request.send();
         }
         catch (LoginException ignore) {}
-        response = httpResponse.getBody();
-
-        String[] roles = new String[0];
-        //List<String> groups = findDbGroups(username);
-        Matcher matcher = patternRoles.matcher(response);
-        if (matcher.find())
-            roles = matcher.group(1).replaceAll("\"","").split(",");
-        
+        if (httpResponse != null)
+        {
+            response = httpResponse.getBody();
+    
+            //List<String> groups = findDbGroups(username);
+            Matcher matcher = patternRoles.matcher(response);
+            if (matcher.find())
+                roles = matcher.group(1).replaceAll("\"","").split(",");
+        }
         return Arrays.asList(roles);
     }
     

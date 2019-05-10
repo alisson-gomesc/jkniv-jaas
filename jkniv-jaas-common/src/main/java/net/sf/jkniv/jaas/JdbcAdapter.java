@@ -257,7 +257,7 @@ public class JdbcAdapter
         }
         catch (SQLException ex)
         {
-            String msg = I18nManager.getString("hybrid.realm.invaliduser", username);
+            String msg = I18nManager.getString("hybrid.realm.invaliduser", username, username);
             LOG.log(Level.WARNING, msg);
             LOG.log(Level.FINE, I18nManager.getString("hybrid.realm.invaliduserpass", username, "***"), ex);
         }

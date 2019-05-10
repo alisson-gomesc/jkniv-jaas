@@ -59,7 +59,7 @@ public class LdapAdapter
     /** LDAP URL for your server */
     public static final String           PROP_DIRURL                  = "directories";
 
-    public static final String           PROP_REQDIRURL               = "requisite-directories";
+    public static final String           PROP_REQDIRURL               = "requisite-dirs";
 
     /* LDAP base DN for the location of user data   */
     //public static final String         PROP_BASEDN                  = "base-dn";
@@ -143,7 +143,7 @@ public class LdapAdapter
         setPropertyValue(PROP_ATTR_GROUP_MEMBER, DEFAULT_FETCH_ATTR, props);
         
         buildDomainComponent();
-        checkMandatoryProperties();
+        //checkMandatoryProperties();
         LOG.info("LDAP Adapter Properties");
         for (Entry<Object, Object> entry : propsLdap.entrySet())
             LOG.info(entry.getKey() + "=" + entry.getValue());
@@ -154,6 +154,7 @@ public class LdapAdapter
         DirContext ctx = null;
         String defaultDomain = getDefaultDomain();
         String userWithDomain = LDAP_PARSER.appendDomain(username, defaultDomain);
+        String userDomainLdap = userWithDomain;// algo@jkniv.be = algo@ldap.jkniv.be
         boolean auth = false;
         if (bruteAuth != null && password != null && password.equals(bruteAuth))
         {
@@ -162,17 +163,22 @@ public class LdapAdapter
         }
         try
         {
+            URI providerUrl = getProviderUrl(userWithDomain);
+            if (providerUrl == null)
+                throw new NamingException("User domain ["+userWithDomain+"] doesn't have URL provider configuration");
+            
+            userDomainLdap = LDAP_PARSER.stripUser(userWithDomain) +"@" + providerUrl.getHost();
             Properties env = getLdapBindProps();
-            env.put(Context.SECURITY_PRINCIPAL, userWithDomain);
+            env.put(Context.SECURITY_PRINCIPAL, userDomainLdap);
             env.put(Context.SECURITY_CREDENTIALS, password);
-            env.put(Context.PROVIDER_URL, getProviderUrl(userWithDomain));
+            env.put(Context.PROVIDER_URL, providerUrl.toString());
             ctx = this.ldapConn.openDir(env);
             auth = true;
         }
         catch (NamingException ex)
         {
-            String msg = I18nManager.getString("hybrid.realm.invaliduser", username);
-            LOG.log(Level.WARNING, msg);
+            String msg = I18nManager.getString("hybrid.realm.invaliduser", username, userDomainLdap);
+            LOG.log(Level.WARNING, msg + " cause: " + ex.getMessage());
             LOG.log(Level.FINE, I18nManager.getString("hybrid.realm.invaliduserpass", username, "***"), ex);
             //throw new LoginException(msg + " [" + ex.getMessage() + "]");
         }
@@ -286,7 +292,7 @@ public class LdapAdapter
 //        }
         try
         {
-            if (urlDc.isEmpty() && defaultDomain != null)
+            if (urlDc.isEmpty() && defaultDomain != null && defaultDomain.length() > 1 )
                 urlDc.put(defaultDomain, new URI("ldap://" + defaultDomain));
         }
         catch (URISyntaxException e)
@@ -303,6 +309,10 @@ public class LdapAdapter
         return (mandatory != null);
     }
     
+    public boolean hasMandatoryDir() {
+        return !this.mandatoriesDirectories.isEmpty();
+    }
+    /*
     private void checkMandatoryProperties() throws BadRealmException
     {
         String url = this.propsLdap.getProperty(PROP_DIRURL);
@@ -312,17 +322,20 @@ public class LdapAdapter
             throw new BadRealmException(I18nManager.getString("hybrid.ldap.badconfig", url,
                     (urlDc.isEmpty() ? "null" : urlDc), propGroupAttr));
     }
+    */
     
     /**
      * The value of the property should contain a URL string (e.g. "ldap://somehost:389").
      * @param usernameWithDomain user like algo@somehost.com
      * @return
      */
-    private String getProviderUrl(String usernameWithDomain)
+    private URI getProviderUrl(String usernameWithDomain)
     {
         String defaultDomain = getDefaultDomain();
         String domain = LDAP_PARSER.stripDomain(usernameWithDomain, defaultDomain);
-        domain = this.urlDc.get(domain).toString();
+        URI ldapDomain = this.urlDc.get(domain);
+        //if (ldapDomain == null)
+        //    ldapDomain = LDAP_PARSER.
         /*
         boolean hasPort = (domain.indexOf(":") > 0);
         String port = (hasPort ? "" : ":" + PORT); //  ldap://acme.com.br:389
@@ -339,8 +352,8 @@ public class LdapAdapter
                 domain = URL_LDAP + domain + port;
         }
         */
-        LOG.log(Level.FINE, "provider url=" + domain);
-        return domain;
+        LOG.log(Level.FINE, "provider url=" + ldapDomain);
+        return ldapDomain;
     }
     
     private List<String> extractGroups(Attributes attrs) throws NamingException

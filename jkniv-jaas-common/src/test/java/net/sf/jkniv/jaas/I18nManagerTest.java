@@ -39,8 +39,9 @@ public class I18nManagerTest
     public void whenI18nFormatTextSuccessfully1Params()
     {
         //hybrid.realm.invaliduser=User {1} invalid.
-        String s = I18nManager.getString("hybrid.realm.invaliduser", "mary");
-        assertThat(s, is("User mary invalid."));
+        //Input user [{1}] is not valid against ldap user [{2}]
+        String s = I18nManager.getString("hybrid.realm.invaliduser", "mary", "mary@jkniv.be");
+        assertThat(s, is("Input user [mary] is not valid against ldap user [mary@jkniv.be]"));
     }
 
     

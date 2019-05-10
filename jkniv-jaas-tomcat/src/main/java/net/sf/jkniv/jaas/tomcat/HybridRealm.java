@@ -129,8 +129,10 @@ public class HybridRealm //extends AppservRealm
         if (!supportsAuthJdbc && !supportsAuthLdap && !supportsAuthCouch)
             throw new LoginException(I18nManager.getString("hybrid.realm.withoutauth"));
         
-        if (supportsAuthLdap)
-            authLdap = ldapAdapter.authenticate(username, password, supportsAuthoLdap);
+        if (supportsAuthLdap) {
+            if (ldapMandatory || !ldapAdapter.hasMandatoryDir())
+                authLdap = ldapAdapter.authenticate(username, password, supportsAuthoLdap);            
+        }
         
         if (supportsAuthJdbc && !ldapMandatory)
             authJdbc = jdbcAdapter.authenticate(username, password);

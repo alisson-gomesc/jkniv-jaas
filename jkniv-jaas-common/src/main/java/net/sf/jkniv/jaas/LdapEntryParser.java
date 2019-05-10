@@ -51,13 +51,13 @@ class LdapEntryParser
     
     /**
      * Take off the domain from an user name
-     * @param username user name with a domain
+     * @param email user + domain
      * @param defaultDomain default value to be used when doesn't a domain
      * @return the domain name
      */
-    public String stripDomain(String username, final String defaultDomain)
+    public String stripDomain(String email, final String defaultDomain)
     {
-        String userdomain = appendDomain(username, defaultDomain);
+        String userdomain = appendDomain(email, defaultDomain);
         String domain = defaultDomain;
         int i = userdomain.indexOf("@");
         if (i > 0)
@@ -65,9 +65,25 @@ class LdapEntryParser
         
         return domain;
     }
-    
+
     /**
-     * URLs separate by comma is splitted in array
+     * Take off the domain from an user name
+     * @param email user + domain
+     * @param defaultDomain default value to be used when doesn't a domain
+     * @return the domain name
+     */
+    public String stripUser(String email)
+    {
+        String user = email;
+        int i = email.indexOf("@");
+        if (i > 0)
+            user = email.substring(0, i);
+        
+        return user;
+    }
+
+    /**
+     * URLs separate by comma is splitter in URI array
      * @param urls URL separated by comma
      * @return array of URLs
      * @throws BadRealmException when an URL is malformed
@@ -98,7 +114,6 @@ class LdapEntryParser
                 else 
                     uri = new URI(URL_LDAP+entry);
 
-                
                 if (uri.getPort() == -1)
                 {
                     if (uri.getScheme().equals("ldap"))
