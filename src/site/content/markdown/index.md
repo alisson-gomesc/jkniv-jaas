@@ -3,9 +3,7 @@ Title: JAAS Hybrid Realm
 JAAS Hybrid Realm
 --------------------
 
-
 [Java Authentication and Authorization Service (JAAS)][1] provide mechanism to authentication and authorization the users making your application independent from authentication technologies.
-
 
 Hybrid Realm provides an interchangeable and combined for authentication and authorization your application, where could be combined Database Realm x LDAP Real x CouchDB Realm:
 
@@ -30,7 +28,7 @@ for Glassfish server:
     <dependency>
       <groupId>net.sf.jkniv</groupId>
       <artifactId>jkniv-jaas-glassfish</artifactId>
-      <version>0.3.5</version>
+      <version>0.3.6</version>
     </dependency>
 
 for Jetty server:
@@ -38,7 +36,7 @@ for Jetty server:
     <dependency>
       <groupId>net.sf.jkniv</groupId>
       <artifactId>jkniv-jetty-glassfish</artifactId>
-      <version>0.3.5</version>
+      <version>0.3.6</version>
     </dependency>
 
 
@@ -47,7 +45,7 @@ for Tomcat server:
     <dependency>
       <groupId>net.sf.jkniv</groupId>
       <artifactId>jkniv-jaas-glassfish</artifactId>
-      <version>0.3.5</version>
+      <version>0.3.6</version>
     </dependency>
 
 
@@ -56,8 +54,18 @@ If your application needs use the Cypher algorithm to encrypt the passwords you 
     <dependency>
       <groupId>net.sf.jkniv</groupId>
       <artifactId>jkniv-jaas-common</artifactId>
-      <version>0.3.5</version>
+      <version>0.3.6</version>
     </dependency>
+
+## Changes in version 0.3.6
+
+### Bug
+- ![BUG Fix](images/bug_icon.png "BUG Fix") Authenticate user in LDAP doesn't take the **directories** configuration.
+- ![BUG Fix](images/bug_icon.png "BUG Fix")  Authentication using default domain didn't fetch LDAP groups
+    
+### Improvement
+- ![Update](images/update_icon.png "Update") The user's authentication a specific domain could be mandatory authenticate in LDAP
+- ![Update](images/update_icon.png "Update") The domain name from email could be mapped to another host, like: algo@`acme.com`  to `ldap.acme.com:386`
 
 
 **Note:** It's mandatory to have at least one **authentication** mode enable: `authe-ldap`, `authe-jdbc` and/or `authe-couchdb`.

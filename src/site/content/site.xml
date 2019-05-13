@@ -23,7 +23,7 @@
   <body>
     <head>
       <![CDATA[
-      <meta name="keywords" content="jaas, realm, glassfish, tomcat, jetty" />
+      <meta name="keywords" content="java, jaas, realm, glassfish, tomcat, jetty" />
       ]]>
     </head>
     <breadcrumbs>
@@ -38,6 +38,7 @@
       <item name="Config Jetty" href="jetty-realm.html" />
       <item name="Config Tomcat" href="tomcat-realm.html" />
       <item name="Config Glassfish" href="glassfish-realm.html" />
+      <item name="Changes Log" href="changes.html" />
       <item name="Javadoc" href="api-docs/index.html" />
       <item name="Donwload" href="https://sourceforge.net/projects/jkniv/files/jkniv-jaas" />
     </menu>
