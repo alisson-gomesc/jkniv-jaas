@@ -38,11 +38,11 @@ JAAS Hybrid realm configuration must be configured for one technology or a combi
 | default-domain       |                | Default domain from users when try authenticate without write a domain |
 | group-member-attr    | `memberOf`    | attribute name to get the groups from user |
 | search-filter        | `mail`        | attribute to identify the user, default it's email |
-| directories          |                | Comma-separated list of LDAP URLs, format: `ldap://[host]:[port]`. examples: `acme.com.br`,`ldap://mycompany.com:386`,`othercompany.com:389`. Default protocol is ldap:// and default port is 389. In **0.3.6** supports map email to domain like `"acme.com, acme.com=ldap.acme.com, othercompany.com=ldap.othercompany.com"`|
+| directories          |                | Comma-separated list of LDAP URLs, format: `ldap://[host]:[port]`. examples: `"acme.com.br,ldap://mycompany.com:386,othercompany.com:389"`. Default protocol is ldap:// and default port is 389. In **0.3.6** supports map email to domain like `"acme.org, acme.com=ldap.acme.org"`|
 | java.naming.referral | `follow`      | indicate to the service provider how to handle referral. |
 | java.naming.factory.initial | `com.sun.jndi.ldap.LdapCtxFactory` | Initial context to LDAP service provider. |
 | com.sun.jndi.*       |      | Any property started with `com.sun.jndi.` will be set in `InitialDirContext` instance. |
-|requisite-dirs        | Enable that LDAP directory is mandatory for specific domains. Example: `acme.com.br,acme.com` means that users from **john@acme.com.br** or **mary@acme.com** must be authenticated in LDAP|
+|requisite-dirs        |      | Enable that LDAP directory is mandatory for specific domains. Example: `acme.org,acme.com` means that users from `john@acme.org` or `mary@acme.com` must be authenticated in LDAP|
 
 
 #### JDBC Properties
