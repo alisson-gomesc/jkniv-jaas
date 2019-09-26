@@ -34,9 +34,6 @@ class HttpResponse
         this.body = body;
         this.headers = headers;
     }
-
-    
-    
     
     public int getStatus()
     {
